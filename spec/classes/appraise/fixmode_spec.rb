@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'tpm::ima::appraise::fixmode' do
+describe 'ima::appraise::fixmode' do
   on_supported_os.each do |os, os_facts|
     context "on #{os}" do
 

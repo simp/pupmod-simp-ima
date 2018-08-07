@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'tpm::ima::policy' do
+describe 'ima::policy' do
   on_supported_os.each do |os, os_facts|
     context "on #{os}" do
 
@@ -19,7 +19,7 @@ describe 'tpm::ima::policy' do
       }
 
       context 'with default params' do
-        it { is_expected.to create_class('tpm::ima::policy') }
+        it { is_expected.to create_class('ima::policy') }
         if os_facts[:operatingsystemmajrelease].to_s == '6'
           it { is_expected.to create_file('/etc/init.d/import_ima_rules').with_ensure('absent') }
           it { is_expected.to create_service('import_ima_rules').with({
@@ -40,7 +40,7 @@ describe 'tpm::ima::policy' do
         context 'nothing else set' do
           let(:params) { new_params.merge({}) }
           it { is_expected.to compile.with_all_deps }
-          it { is_expected.to create_class('tpm::ima::policy') }
+          it { is_expected.to create_class('ima::policy') }
           it { is_expected.to create_file('/etc/ima').with_ensure('directory') }
           it { is_expected.to create_exec('load_ima_policy') \
             .with_command('cat /etc/ima/policy.conf > /sys/kernel/security/ima/policy') }

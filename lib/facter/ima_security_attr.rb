@@ -1,7 +1,7 @@
 # A structured fact to tell if IMA expects the files system to be relabeled, is
 # in the process of relabeling, or does not need relabeling.
 #
-# This checks for the existence of a file set by the ``tpm::ima::appraise``
+# This checks for the existence of a file set by the ``ima::appraise``
 # class and also checks if the script from the same module is running.
 #
 # return values:

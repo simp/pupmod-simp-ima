@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 
-describe 'tpm::ima::appraise::relabel' do
+describe 'ima::appraise::relabel' do
   on_supported_os.each do |os, os_facts|
     context "on #{os}" do
       let (:default_facts) do
@@ -33,7 +33,7 @@ describe 'tpm::ima::appraise::relabel' do
             })
           end
 
-          it { is_expected.to contain_class('tpm::ima::appraise::enforcemode')}
+          it { is_expected.to contain_class('ima::appraise::enforcemode')}
         end
 
         context 'with ima_security_attr relabel' do

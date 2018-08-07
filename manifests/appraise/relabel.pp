@@ -19,14 +19,14 @@
 #  @param relabel_file   The location of the file that
 #     that indicates a labeling of the file system is needed.
 #
-class tpm::ima::appraise::relabel(
+class ima::appraise::relabel(
   Stdlib::AbsolutePath  $relabel_file,
-  Stdlib::AbsolutePath  $scriptdir = $tpm::ima::appraise::scriptdir,
+  Stdlib::AbsolutePath  $scriptdir = $ima::appraise::scriptdir,
 ){
 
   case  $facts['ima_security_attr'] {
     'inactive': {
-      include 'tpm::ima::appraise::enforcemode'
+      include 'ima::appraise::enforcemode'
     }
     'active': {
       notify {'IMA updates running':

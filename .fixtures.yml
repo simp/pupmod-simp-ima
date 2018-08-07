@@ -15,4 +15,4 @@ fixtures:
       repo: https://github.com/simp/puppet-yum
       ref: v2.1.0
   symlinks:
-    tpm: "#{source_dir}"
+    ima: "#{source_dir}"

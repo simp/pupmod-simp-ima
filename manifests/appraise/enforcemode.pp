@@ -1,6 +1,6 @@
 #  set the ima appraise mode to enforce
 #
-class tpm::ima::appraise::enforcemode(
+class ima::appraise::enforcemode(
 ){
 
     kernel_parameter { 'ima_appraise':

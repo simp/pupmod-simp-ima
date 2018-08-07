@@ -9,20 +9,20 @@
 #
 # (TODO: check for this and set if possible)
 #
-# Then include the ``tpm`` module in your classes and set the following in Hiera:
+# Then include the ``ima`` module in your classes and set the following in Hiera:
 #
 # @example enable IMA via Hiera
-#   tpm::ima: true
-#   tpm::ima::enable: true
+#   ima: true
+#   ima::enable: true
 #
 #   # enable IMA Appraisal
-#   tpm::ima::manage_appraise: true
-#   tpm::ima::appraise::enable: true
+#   ima::manage_appraise: true
+#   ima::appraise::enable: true
 #
 #   # It is also recommended although not necessary, to enable the management of
 #   # the ima policy because the default policy is over zealous
-#   tpm::ima::manage_policy: true
-#   tpm::ima::policy::manage: true
+#   ima::manage_policy: true
+#   ima::policy::manage: true
 #
 # When ``puppet`` runs it will configure the system to reboot into ``ima_appraise`` mode ``fix``.
 #
@@ -40,7 +40,7 @@
 #
 # If you need to update files after the system has been in enforce mode:
 #
-#   1. Set ``tpm::ima::appraise::force_fixmode`` to ``true``,
+#   1. Set ``ima::appraise::force_fixmode`` to ``true``,
 #   2. Run ``puppet`` and reboot when prompted.
 #
 # When you have completed the upgrade, run the script ``/usr/local/bin/ima_security_attr_update.sh``.
@@ -77,8 +77,8 @@
 #
 # @author SIMP Team  <https://simp-project.com/>
 #
-class tpm::ima::appraise(
-  Simplib::PackageEnsure $package_ensure = $::tpm::package_ensure,
+class ima::appraise(
+  Simplib::PackageEnsure $package_ensure = $::ima::package_ensure,
   Boolean                $enable         = true,
   Stdlib::AbsolutePath   $relabel_file   = "${facts['puppet_vardir']}/simp/.ima_relabel",
   Stdlib::AbsolutePath   $scriptdir      = '/usr/local/bin',
@@ -108,23 +108,23 @@ class tpm::ima::appraise(
       ensure => file,
       owner  => 'root',
       mode   => '0700',
-      source => 'puppet:///modules/tpm/ima_security_attr_update.sh'
+      source => 'puppet:///modules/ima_security_attr_update.sh'
     }
     # check if ima_apprasal is set on the boot cmdline
     if $force_fixmode {
-      class { 'tpm::ima::appraise::fixmode':
+      class { 'ima::appraise::fixmode':
         relabel_file => $relabel_file,
         relabel      => false
       }
     } else {
       case $facts['cmdline']['ima_appraise'] {
         'fix': {
-          class { 'tpm::ima::appraise::relabel':
+          class { 'ima::appraise::relabel':
             relabel_file => $relabel_file
           }
         }
         'off' : {
-          class { 'tpm::ima::appraise::fixmode':
+          class { 'ima::appraise::fixmode':
             relabel_file => $relabel_file,
             relabel      => true
           }
@@ -142,7 +142,7 @@ class tpm::ima::appraise(
             }
           } else {
           # It is being turned on and should be set to fix mode
-            class { 'tpm::ima::appraise::fixmode':
+            class { 'ima::appraise::fixmode':
               relabel_file        => $relabel_file,
               relabel => true
             }

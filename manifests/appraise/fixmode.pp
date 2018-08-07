@@ -1,6 +1,6 @@
 #  set the ima appraise mode to fix
 #
-class tpm::ima::appraise::fixmode(
+class ima::appraise::fixmode(
   StdLib::AbsolutePath $relabel_file,
   Boolean              $relabel
 ){

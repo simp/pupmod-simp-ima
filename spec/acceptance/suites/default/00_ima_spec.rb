@@ -1,9 +1,9 @@
 require 'spec_helper_acceptance'
 require 'json'
 
-test_name 'tpm::ima class'
+test_name 'ima class'
 
-describe 'tpm::ima class' do
+describe 'ima class' do
   hosts.each do |host|
     it 'should set a root password' do
       on(host, "sed -i 's/enforce_for_root//g' /etc/pam.d/*")
@@ -14,10 +14,9 @@ describe 'tpm::ima class' do
   context 'normal, loose rules' do
     hosts.each do |host|
       manifest = <<-EOF
-        include 'tpm'
-        include 'tpm::ima'
-        include 'tpm::ima::policy'
-        # class { 'tpm::ima::policy':
+        include 'ima'
+        include 'ima::policy'
+        # class { 'ima::policy':
         #   set_with_service => false,
         #   set_with_puppet  => false
         # }
@@ -52,9 +51,8 @@ describe 'tpm::ima class' do
   context 'stricter rules' do
     hosts.each do |host|
       manifest = <<-EOF
-        include 'tpm'
-        include 'tpm::ima'
-        class { 'tpm::ima::policy':
+        include 'ima'
+        class { 'ima::policy':
           measure_root_read_files => true,
           measure_file_mmap       => true,
           measure_bprm_check      => true,

@@ -6,11 +6,11 @@ shared_examples_for 'an ima appraise enabled system' do
   it { is_expected.to create_package('ima-evm-utils') }
   it { is_expected.to create_kernel_parameter('ima_appraise_tcb')}
   it { is_expected.to create_file('/myscripts/ima_security_attr_update.sh').with({
-    'source' => 'puppet:///modules/tpm/ima_security_attr_update.sh'
+    'source' => 'puppet:///modules/ima_security_attr_update.sh'
   })}
 end
 
-describe 'tpm::ima::appraise' do
+describe 'ima::appraise' do
   on_supported_os.each do |os, os_facts|
     context "on #{os}" do
 
@@ -35,7 +35,7 @@ describe 'tpm::ima::appraise' do
             })
           end
           it_should_behave_like 'an ima appraise enabled system'
-          it { is_expected.to contain_class('tpm::ima::appraise::fixmode').with({
+          it { is_expected.to contain_class('ima::appraise::fixmode').with({
             'relabel' => true  })}
         end
 
@@ -46,8 +46,8 @@ describe 'tpm::ima::appraise' do
             })
           end
           it_should_behave_like 'an ima appraise enabled system'
-          it { is_expected.to_not contain_class('tpm::ima::appraise::fixmode') }
-          it { is_expected.to_not contain_class('tpm::ima::appraise::relabel') }
+          it { is_expected.to_not contain_class('ima::appraise::fixmode') }
+          it { is_expected.to_not contain_class('ima::appraise::relabel') }
           it { is_expected.to contain_file('/tmp/relabel').with({
             'ensure' => 'absent'
           })}
@@ -60,8 +60,8 @@ describe 'tpm::ima::appraise' do
             })
           end
           it_should_behave_like 'an ima appraise enabled system'
-          it { is_expected.to_not contain_class('tpm::ima::appraise::fixmode') }
-          it { is_expected.to contain_class('tpm::ima::appraise::relabel').with({
+          it { is_expected.to_not contain_class('ima::appraise::fixmode') }
+          it { is_expected.to contain_class('ima::appraise::relabel').with({
             'relabel_file' => '/tmp/relabel'})}
         end
 
@@ -72,8 +72,8 @@ describe 'tpm::ima::appraise' do
             })
           end
           it_should_behave_like 'an ima appraise enabled system'
-          it { is_expected.to_not contain_class('tpm::ima::appraise::fixmode') }
-          it { is_expected.to_not contain_class('tpm::ima::appraise::relabel') }
+          it { is_expected.to_not contain_class('ima::appraise::fixmode') }
+          it { is_expected.to_not contain_class('ima::appraise::relabel') }
           it { is_expected.to contain_file('/tmp/relabel').with({
             'ensure' => 'absent'
           })}
@@ -86,9 +86,9 @@ describe 'tpm::ima::appraise' do
             })
           end
           it_should_behave_like 'an ima appraise enabled system'
-          it { is_expected.to contain_class('tpm::ima::appraise::fixmode').with({
+          it { is_expected.to contain_class('ima::appraise::fixmode').with({
             'relabel' => true  })}
-          it { is_expected.to_not contain_class('tpm::ima::appraise::relabel') }
+          it { is_expected.to_not contain_class('ima::appraise::relabel') }
           it_should_behave_like 'an ima appraise enabled system'
         end
       end
@@ -101,9 +101,9 @@ describe 'tpm::ima::appraise' do
           package_ensure: 'installed'
         }}
         it_should_behave_like 'an ima appraise enabled system'
-        it { is_expected.to contain_class('tpm::ima::appraise::fixmode').with({
+        it { is_expected.to contain_class('ima::appraise::fixmode').with({
           'relabel' => false  })}
-        it { is_expected.to_not contain_class('tpm::ima::appraise::relabel') }
+        it { is_expected.to_not contain_class('ima::appraise::relabel') }
       end
       context 'with enable set to false' do
         let (:params) {{

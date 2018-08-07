@@ -72,7 +72,7 @@
 # @param appraise_fowner
 #   Appraises all files **owned by root**
 #
-class tpm::ima::policy (
+class ima::policy (
   Boolean       $manage                      = false,
   Boolean       $dont_watch_proc             = true,
   Boolean       $dont_watch_sysfs            = true,
@@ -148,7 +148,7 @@ class tpm::ima::policy (
       ensure  => file,
       owner   => 'root',
       mode    => '0640',
-      content => template('tpm/ima_policy.conf.erb'),
+      content => template("${module_name}/ima_policy.conf.erb"),
       require => File['/etc/ima'],
       notify  => Exec['load_ima_policy']
     }
@@ -159,7 +159,7 @@ class tpm::ima::policy (
       file { '/usr/lib/systemd/system/import_ima_rules.service':
         ensure => file,
         mode   => '0644',
-        source => 'puppet:///modules/tpm/import_ima_rules.service'
+        source => "puppet:///modules/${module_name}/import_ima_rules.service"
       }
       service { 'import_ima_rules.service':
         ensure  => stopped,
@@ -176,7 +176,7 @@ class tpm::ima::policy (
       file { '/etc/init.d/import_ima_rules':
         ensure => file,
         mode   => '0755',
-        source => 'puppet:///modules/tpm/import_ima_rules'
+        source => "puppet:///modules/${module_name}/import_ima_rules"
       }
       service { 'import_ima_rules':
         ensure  => stopped,
