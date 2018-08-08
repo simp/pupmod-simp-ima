@@ -143,8 +143,8 @@ class ima::appraise(
           } else {
           # It is being turned on and should be set to fix mode
             class { 'ima::appraise::fixmode':
-              relabel_file        => $relabel_file,
-              relabel => true
+              relabel_file => $relabel_file,
+              relabel      => true
             }
           }
         }

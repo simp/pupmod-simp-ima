@@ -51,7 +51,7 @@ describe 'ima' do
         it { is_expected.to contain_class('ima::policy') }
       end
 
-      context 'with kernel verson >= 3.13' do
+      context 'with kernel version >= 3.13' do
         let(:facts) do
           os_facts.merge({
             cmdline:      { 'foo' => 'bar' },

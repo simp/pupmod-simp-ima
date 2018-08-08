@@ -1,4 +1,4 @@
-[![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html) [![Build Status](https://travis-ci.org/simp/pupmod-simp-tpm.svg)](https://travis-ci.org/simp/pupmod-simp-tpm)
+[![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html) [![Build Status](https://travis-ci.org/simp/pupmod-simp-tpm.svg)](https://travis-ci.org/simp/pupmod-simp-ima)
 
 #### Table of Contents
 
@@ -16,27 +16,12 @@
 
 ## Description
 
-This module manages a TPM, including taking ownership and enabling IMA. You must
-take ownership of a TPM to load and unload certs, use it as a PKCS #11
-interface, or to use SecureBoot or IMA.
-
-The [Integrity Management Architecture (IMA)](https://sourceforge.net/p/linux-ima/wiki/Home/)
-subsystem is a tool that uses the TPM to verify integrity of the system, based
-on filesystem and file hashes. The IMA class sets up IMA kernel boot flags if
+This module manages the [Integrity Management Architecture (IMA)](https://sourceforge.net/p/linux-ima/wiki/Home/),
+a tool that uses the TPM to verify integrity of the system, based on filesystem 
+and file hashes. The IMA class sets up IMA kernel boot flags if
 they are not enabled and when they are, mounts the `securityfs`. This module can
 manage the IMA policy, although modifying the policy incorrectly could cause
 your system to become read-only.
-
-The TPM ecosystem has been designed to be difficult to automate. The difficulty
-has shown many downsides of using a tool like this module to manage your
-TPM device. For example, simply reading the TPM's public key after taking
-ownership of the device requires the owner password to be typed in at the
-command line. This is an intentional feature to encourage admins to be
-physically present at the machine with the device. To get around this, the
-provider included in this module and the advanced facts use Ruby's `expect`
-library to interact with the command line. This module also drops the owner
-password in the Puppet `$vardir` to make interacting with trousers in facts
-possible.
 
 
 ### This is a SIMP module
@@ -76,13 +61,8 @@ This module is optimally designed for use within a larger SIMP ecosystem, but it
 --------------------------------------------------------------------------------
 
 This module will:
-* Install `tpm-tools` and `trousers`
-* Enable the `tcsd` service
-* (*OPTIONAL*) Take ownership of the TPM
-  * The password will be in a flat file in `$vardir/simp`
-* (*OPTIONAL*) Enable IMA on the host
+*  Enable IMA on the host
   * (*OPTIONAL*) Manage the IMA policy (BROKEN - See Limitations)
-* (*OPTIONAL*) Install `tboot`, create policy, and add grub entry
 
 
 ### Setup Requirements
@@ -112,123 +92,16 @@ are the string 'well-known', then the well known option will be added to the
 
 ```yaml
 classes:
-  - tpm
-
-tpm::take_ownership: true
-tpm::ownership::advanced_facts: true
-
-tpm::ownership::owner_pass: 'twentycharacters0000'
-tpm::ownership::srk_pass: 'well-known'
+  - ima
 ```
 
-To enable IMA and the PKCS #11 interface, add this to hiera:
+To enable IMA, add this to hiera:
 
 ```yaml
-tpm::use_ima: true
-tpm::enable_pkcs_interface: true
+ima::use_ima: true
 ```
-
-To enable the PKCS#11 interface, add the `tpm::pkcs11` class to your node and set the PINs in hiera:
-
-```yaml
-classes:
-  - tpm::pkcs11
-
-tpm::pkcs11::so_pin: '12345678'
-tpm::pkcs11::user_pin: '87654321'
-```
-
-To start with Trusted Boot follow the directions below carefully.
 
 ## Usage
-
-### Ownership
-
-The type and provider for tpm ownership provided in this module can be used as follows:
-
-```puppet
-tpm_ownership { 'tpm0':
-  ensure         => present,
-  owner_pass     => 'well-known',
-  srk_pass       => 'well-known',
-  advanced_facts => true
-}
-```
-
-### PKCS#11
-
-The PKCS#11 slot type and provider can be enabled as follows:
-
-```puppet
-tpmtoken { 'TPM PKCS#11 token':
-  ensure   => present,
-  so_pin   => '12345678',
-  user_pin => '87654321'
-}
-```
-
-### Trusted Boot
-
-This module should be able to create the policy required to allow the machine to
-complete a measured launch.
-
-1. Make sure the TPM owner password is 20 characters long and the SRK password
-   is 'well-known', equivalent to `tpm_takeownership -z`
-2. Download the appropriate SINIT for your platform from the [Intel website](https://software.intel.com/en-us/articles/intel-trusted-execution-technology)
-3. Extract the zip and put it on a webserver somewhere or in a profile module.
-4. Set the following data in hiera:
-
-```yaml
----
-tpm::tboot::sinit_name: 2nd_gen_i5_i7_SINIT_51.BIN # the appropriate BIN
-tpm::tboot::sinit_source: 'puppet:///profiles/2nd_gen_i5_i7_SINIT_51.BIN' # where ever you choose to stash this
-tpm::tboot::owner_password: "%{alias('tpm::ownership::owner_pass')}"
-```
-
-5. Include the `tpm::tboot` class:
-
-```yaml
----
-classes:
-  - tpm
-  - tpm::tboot
-```
-
-6. Reboot into the Grub option that specifies 'no policy', booting into a tboot session
-7. Let puppet run again at boot
-8. Reboot into the normal tboot boot option
-9. Check the `tboot` fact for a measured launch: `puppet facts | grep measured_launch` or just run `txt-stat`
-
-#### Locking the kernel
-
-The `tpm::tboot` class will use the `yum::versionlock` define from the
-`voxpupuli/yum` module to make sure the version of the kernel that the tboot
-policy was created with doesn't get upgraded without the user knowing. To
-disable this, set the `tpm::tboot::lock_kernel_packages` parameter to `false`.
-
-This module does provide a script to upgrade the policy, though it shouldn't be
-run from Puppet. To update your verified launch policy, do the following steps:
-
-1. `yum update kernel`
-2. `grub2-mkconfig -o /etc/grub2.cfg`
-3. `sh /root/txt/txt/update_tboot_policy.sh <owner password>`
-
-And reboot!
-
-## Reference
-
-Please refer to the inline documentation within each source file, or to the
-module's generated YARD documentation for reference material.
-
-
-## Limitations
-
-SIMP Puppet modules are generally intended for use on Red Hat Enterprise Linux
-and compatible distributions, such as CentOS. Please see the
-[`metadata.json` file](./metadata.json) for the most up-to-date list of
-supported operating systems, Puppet versions, and module dependencies.
-
-This module does not support clearing a previously owned TPM.
 
 ### IMA
 
@@ -238,15 +111,15 @@ It causes the system to become read-only, even though it is only using supported
 configuration elements. The module will be updated soon with more sane defaults
 to allow for at least the minimal amount of a system to be measured.
 
-To get started, include the `tpm::ima::policy` class and set these parameters.
+To get started, include the `ima::policy` class and set these parameters.
 From there, they can be changed to `true` on one by one:
 
 ```yaml
-tpm::ima::policy::measure_root_read_files: false
-tpm::ima::policy::measure_file_mmap: false
-tpm::ima::policy::measure_bprm_check: false
-tpm::ima::policy::measure_module_check: false
-tpm::ima::policy::appraise_fowner: false
+ima::policy::measure_root_read_files: false
+ima::policy::measure_file_mmap: false
+ima::policy::measure_bprm_check: false
+ima::policy::measure_module_check: false
+ima::policy::appraise_fowner: false
 ```
 
 ## Development
