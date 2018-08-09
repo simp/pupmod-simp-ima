@@ -3,10 +3,10 @@
 #### Table of Contents
 
 1. [Description](#description)
-2. [Setup - The basics of getting started with tpm](#setup)
-    * [What tpm affects](#what-tpm-affects)
+2. [Setup - The basics of getting started with ima](#setup)
+    * [What ima affects](#what-ima-affects)
     * [Setup requirements](#setup-requirements)
-    * [Beginning with the tpm](#beginning-with-the-tpm-module)
+    * [Beginning with ima](#beginning-with-the-ima-module)
 3. [Usage - Configuration options and additional functionality](#usage)
 4. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
 5. [Limitations - OS compatibility, etc.](#limitations)
@@ -17,7 +17,7 @@
 ## Description
 
 This module manages the [Integrity Management Architecture (IMA)](https://sourceforge.net/p/linux-ima/wiki/Home/),
-a tool that uses the TPM to verify integrity of the system, based on filesystem 
+a tool that verifies the integrity of the system, based on filesystem 
 and file hashes. The IMA class sets up IMA kernel boot flags if
 they are not enabled and when they are, mounts the `securityfs`. This module can
 manage the IMA policy, although modifying the policy incorrectly could cause
@@ -39,16 +39,7 @@ This module is optimally designed for use within a larger SIMP ecosystem, but it
 ## Setup
 
 
-### What tpm affects
-
---------------------------------------------------------------------------------
-> **WARNING**
->
-> This module can take ownership of your TPM. This could be a destructive
-> process and is not easily reversed. For that reason, the provider does not
-> support clearing a TPM.
-
---------------------------------------------------------------------------------
+### What ima affects
 
 --------------------------------------------------------------------------------
 > **WARNING**
@@ -74,21 +65,7 @@ In order to use this module or a TPM in general, you must do the following:
 3. Be able to type in the user/admin password at boot time, every boot
 
 
-### Beginning with the TPM module
-
---------------------------------------------------------------------------------
-> **NOTE**
->
-> Using the 'well-known' SRK password is not recommended for actual use,
-> but it is required for both Intel TXT (Trusted Boot) and the [PKCS#11
-> interface](http://trousers.sourceforge.net/pkcs11.html). If you aren't using
-> either of those technologies, please use a real password.
-
---------------------------------------------------------------------------------
-
-Include the TPM class and set the passwords in hiera. If either of the passwords
-are the string 'well-known', then the well known option will be added to the
-`tpm_takeownership` command used to take ownership of the TPM:
+### Beginning with the IMA module
 
 ```yaml
 classes:
