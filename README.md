@@ -1,4 +1,8 @@
-[![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html) [![Build Status](https://travis-ci.org/simp/pupmod-simp-tpm.svg)](https://travis-ci.org/simp/pupmod-simp-ima)
+[![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/73/badge)](https://bestpractices.coreinfrastructure.org/projects/73)
+[![Puppet Forge](https://img.shields.io/puppetforge/v/simp/ima.svg)](https://forge.puppetlabs.com/simp/ima)
+[![Puppet Forge Downloads](https://img.shields.io/puppetforge/dt/simp/ima.svg)](https://forge.puppetlabs.com/simp/ima)
+[![Build Status](https://travis-ci.org/simp/pupmod-simp-ima.svg)](https://travis-ci.org/simp/pupmod-simp-ima)
 
 #### Table of Contents
 
@@ -54,15 +58,6 @@ This module is optimally designed for use within a larger SIMP ecosystem, but it
 This module will:
 *  Enable IMA on the host
   * (*OPTIONAL*) Manage the IMA policy (BROKEN - See Limitations)
-
-
-### Setup Requirements
-
-In order to use this module or a TPM in general, you must do the following:
-
-1. Enable the TPM in BIOS
-2. Set a user/admin BIOS password
-3. Be able to type in the user/admin password at boot time, every boot
 
 
 ### Beginning with the IMA module
