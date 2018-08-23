@@ -9,7 +9,6 @@
 1. [Description](#description)
 2. [Setup - The basics of getting started with ima](#setup)
     * [What ima affects](#what-ima-affects)
-    * [Setup requirements](#setup-requirements)
     * [Beginning with ima](#beginning-with-the-ima-module)
 3. [Usage - Configuration options and additional functionality](#usage)
 4. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
@@ -37,7 +36,7 @@ If you find any issues, they may be submitted to our [bug tracker](https://simp-
 This module is optimally designed for use within a larger SIMP ecosystem, but it can be used independently:
 
  * When included within the SIMP ecosystem, security compliance settings will be managed from the Puppet server.
- * If used independently, all SIMP-managed security subsystems are disabled by default and must be explicitly opted into by administrators.  Please review the `$client_nets`, `$enable_*` and `$use_*` parameters in `manifests/init.pp` for details.
+ * If used independently, all SIMP-managed security subsystems are disabled by default and must be explicitly opted into by administrators.  Please review the `$enable_*` and `$manage_*` parameters in `manifests/init.pp` for details.
 
 
 ## Setup
@@ -49,8 +48,9 @@ This module is optimally designed for use within a larger SIMP ecosystem, but it
 > **WARNING**
 >
 > Inserting poorly-formed or incorrect policy into the IMA policy file could
-> cause your system to become read-only. This can be temporarily remedied by a
-> reboot. This is the current case with the way the module manages the policy
+> cause your system to become read-only. This can be temporarily remedied by
+> rebooting and temporarily setting ima_appraise to fix in the boot command
+> options. This is the current case with the way the module manages the policy
 > and it is not recommended to use this section of the module at this time.
 
 --------------------------------------------------------------------------------
@@ -67,15 +67,31 @@ classes:
   - ima
 ```
 
-To enable IMA, add this to hiera:
+To utilize IMA, add this to hiera:
 
 ```yaml
-ima::use_ima: true
+ima::manage_policy: true
+ima::manage_appraise: true
 ```
 
 ## Usage
 
-### IMA
+## Reference
+
+Please refer to the inline documentation within each source file, or to the
+module's generated YARD documentation for reference material.
+
+
+## Limitations
+
+SIMP Puppet modules are generally intended for use on Red Hat Enterprise Linux
+and compatible distributions, such as CentOS. Please see the
+[`metadata.json` file](./metadata.json) for the most up-to-date list of
+supported operating systems, Puppet versions, and module dependencies.
+
+The default configuration of this module updates EFI boot parameters if they are 
+present. If the system relies upon BIOS for boot, ensure there is not an EFI
+grub.cfg or grub2.cfg present or the BIOS grub config file will not be updated.
 
 The current RedHat implementation of IMA does not seem to work after inserting
 our default policy (generated example in `spec/files/default_ima_policy.conf`).
@@ -101,8 +117,30 @@ Please read our [Contribution Guide](https://simp.readthedocs.io/en/master/contr
 
 ### Acceptance tests
 
-**TODO:** There are currently no acceptance tests. We would need to use a
-[virtual TPM](https://github.com/stefanberger/swtpm/) to ensure test system
-stability, and it requires quite a few patches to libvirt, associated
-emulation software, Beaker, and Vagrant before acceptance tests for this module become feasible. Read
-our [progress so far on the issue](https://simp-project.atlassian.net/wiki/x/CgAVAg).
+To run the system tests, you need `Vagrant` installed.
+
+You can then run the following to execute the acceptance tests:
+
+```shell
+   bundle exec rake beaker:suites
+```
+
+Some environment variables may be useful:
+
+```shell
+   BEAKER_debug=true
+   BEAKER_provision=no
+   BEAKER_destroy=no
+   BEAKER_use_fixtures_dir_for_modules=yes
+```
+
+*  ``BEAKER_debug``: show the commands being run on the STU and their output.
+*  ``BEAKER_destroy=no``: prevent the machine destruction after the tests
+   finish so you can inspect the state.
+*  ``BEAKER_provision=no``: prevent the machine from being recreated.  This can
+   save a lot of time while you're writing the tests.
+*  ``BEAKER_use_fixtures_dir_for_modules=yes``: cause all module dependencies
+   to be loaded from the ``spec/fixtures/modules`` directory, based on the
+   contents of ``.fixtures.yml``. The contents of this directory are usually
+   populated by ``bundle exec rake spec_prep``. This can be used to run
+   acceptance tests to run on isolated networks.

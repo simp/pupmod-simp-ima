@@ -6,7 +6,7 @@ shared_examples_for 'an ima appraise enabled system' do
   it { is_expected.to create_package('ima-evm-utils') }
   it { is_expected.to create_kernel_parameter('ima_appraise_tcb')}
   it { is_expected.to create_file('/myscripts/ima_security_attr_update.sh').with({
-    'source' => 'puppet:///modules/ima_security_attr_update.sh'
+    'source' => 'puppet:///modules/ima/ima_security_attr_update.sh'
   })}
 end
 
@@ -24,7 +24,7 @@ describe 'ima::appraise' do
       context 'with default params' do
         let (:params) {{
           relabel_file: '/tmp/relabel',
-          package_ensure: 'installed',
+          ensure_packages: 'installed',
           scriptdir: '/myscripts'
         }}
 
@@ -98,7 +98,7 @@ describe 'ima::appraise' do
           relabel_file: '/tmp/relabel',
           scriptdir: '/myscripts',
           force_fixmode: true,
-          package_ensure: 'installed'
+          ensure_packages: 'installed'
         }}
         it_should_behave_like 'an ima appraise enabled system'
         it { is_expected.to contain_class('ima::appraise::fixmode').with({
@@ -108,7 +108,7 @@ describe 'ima::appraise' do
       context 'with enable set to false' do
         let (:params) {{
           enable: false,
-          package_ensure: 'installed',
+          ensure_packages: 'installed',
           scriptdir: '/myscripts',
           relabel_file:   '/tmp/relabel'
         }}

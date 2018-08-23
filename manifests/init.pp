@@ -4,6 +4,9 @@
 # @param enable
 #   Enable IMA on the system
 #
+# @param manage_appraise
+#   Include the ``ima::appraise`` Class
+#
 # @param manage_policy
 #   Include the ``ima::policy`` Class
 #
@@ -45,16 +48,20 @@
 #   The size of ``/sys/kernel/security/ima/ascii_runtime_measurements``, in
 #   bytes, that will cause a reboot notification will be sent to the user.
 #
+# @param ensure_packages
+#   Ensure setting for all packages installed by this module
+#
 class ima (
-  Boolean              $enable          = true,
-  Boolean              $manage_appraise = false,
-  Boolean              $manage_policy   = false,
-  Stdlib::AbsolutePath $mount_dir       = '/sys/kernel/security',
-  Boolean              $ima_tcb         = true,
-  Boolean              $ima_audit       = false,
-  Ima::Template        $ima_template    = 'ima-ng',
-  String[1]            $ima_hash        = 'sha256',
-  Integer[1]           $log_max_size    = 30000000
+  Boolean                $enable          = true,
+  Boolean                $manage_appraise = false,
+  Boolean                $manage_policy   = false,
+  Stdlib::AbsolutePath   $mount_dir       = '/sys/kernel/security',
+  Boolean                $ima_tcb         = true,
+  Boolean                $ima_audit       = false,
+  Ima::Template          $ima_template    = 'ima-ng',
+  String[1]              $ima_hash        = 'sha256',
+  Integer[1]             $log_max_size    = 30000000,
+  Simplib::PackageEnsure $ensure_packages = simplib::lookup('simp_options::package_ensure', { 'default_value' => 'installed' })
 ) {
 
   if $enable {

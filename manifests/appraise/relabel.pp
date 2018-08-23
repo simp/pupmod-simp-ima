@@ -19,6 +19,9 @@
 #  @param relabel_file   The location of the file that
 #     that indicates a labeling of the file system is needed.
 #
+#  @param scriptdir
+#     The directory containing the scripts.
+#
 class ima::appraise::relabel(
   Stdlib::AbsolutePath  $relabel_file,
   Stdlib::AbsolutePath  $scriptdir = $ima::appraise::scriptdir,

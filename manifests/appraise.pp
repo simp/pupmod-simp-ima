@@ -11,10 +11,6 @@
 #
 # Then include the ``ima`` module in your classes and set the following in Hiera:
 #
-# @example enable IMA via Hiera
-#   ima: true
-#   ima::enable: true
-#
 #   # enable IMA Appraisal
 #   ima::manage_appraise: true
 #   ima::appraise::enable: true
@@ -58,12 +54,12 @@
 #   update didn't run. You can fix this by rebooting without the ``ima`` kernel
 #   settings, running ``dracut -f`` and then rebooting in ``ima`` ``appraise``
 #   mode.
+#   
+# @param ensure_packages
+#   Ensure setting for all packages installed by this module
 #
 # @param enable
 #   Enable IMA appraise capability
-#
-# @param package_ensure
-#   How to treat installations of packages
 #
 # @param relabel_file
 #   The file to touch when the file system needs relabeling
@@ -78,21 +74,21 @@
 # @author SIMP Team  <https://simp-project.com/>
 #
 class ima::appraise(
-  Simplib::PackageEnsure $package_ensure = $::ima::package_ensure,
-  Boolean                $enable         = true,
-  Stdlib::AbsolutePath   $relabel_file   = "${facts['puppet_vardir']}/simp/.ima_relabel",
-  Stdlib::AbsolutePath   $scriptdir      = '/usr/local/bin',
-  Boolean                $force_fixmode  = false,
+  Simplib::PackageEnsure $ensure_packages = $::ima::ensure_packages,
+  Boolean                $enable          = true,
+  Stdlib::AbsolutePath   $relabel_file    = "${facts['puppet_vardir']}/simp/.ima_relabel",
+  Stdlib::AbsolutePath   $scriptdir       = '/usr/local/bin',
+  Boolean                $force_fixmode   = false,
 ){
 
   if $enable {
     # Provides ability to check for special attributes
     package { 'attr':
-      ensure => $package_ensure
+      ensure => $ensure_packages
     }
     # Provides the utility to set the security.ima attributes.
     package { 'ima-evm-utils':
-      ensure => $package_ensure
+      ensure => $ensure_packages
     }
 
     kernel_parameter { 'ima_appraise_tcb':
@@ -108,7 +104,7 @@ class ima::appraise(
       ensure => file,
       owner  => 'root',
       mode   => '0700',
-      source => 'puppet:///modules/ima_security_attr_update.sh'
+      source => "puppet:///modules/${module_name}/ima_security_attr_update.sh"
     }
     # check if ima_apprasal is set on the boot cmdline
     if $force_fixmode {
