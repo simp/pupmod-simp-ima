@@ -49,9 +49,10 @@ This module is optimally designed for use within a larger SIMP ecosystem, but it
 >
 > Inserting poorly-formed or incorrect policy into the IMA policy file could
 > cause your system to become read-only. This can be temporarily remedied by
-> rebooting and temporarily setting ima_appraise to fix in the boot command
-> options. This is the current case with the way the module manages the policy
-> and it is not recommended to use this section of the module at this time.
+> rebooting and setting ima_appraise to fix in the kernel command line
+> parameters. This is the current case with the way the module manages the
+> policy and it is not recommended to use this section of the module at this
+> time.
 
 --------------------------------------------------------------------------------
 
