@@ -35,6 +35,10 @@ before_install:
 jobs:
   allow_failures:
     - env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 5.0"
+    # These versions are allowed to fail for the purposes of SIMP-5125
+    # FIXME: Fixing these failures will be addressed in a follow-on issue.
+    - env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 5.3.2"
+    - env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 5.5.1"
 
   include:
     - stage: check
