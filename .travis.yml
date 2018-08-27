@@ -1,0 +1,115 @@
+# The testing matrix considers ruby/puppet versions supported by SIMP and PE:
+#
+# https://puppet.com/docs/pe/2017.3/overview/component_versions_in_recent_pe_releases.html
+# https://puppet.com/misc/puppet-enterprise-lifecycle
+# https://puppet.com/docs/pe/2017.3/overview/getting_support_for_pe.html#standard-releases-and-long-term-support-releases
+# ------------------------------------------------------------------------------
+#  release    pup   ruby   eol
+# PE 2016.4   4.7   2.1.9  2018-10 (LTS)***
+# SIMP 6.0    4.8   2.1.9  TBD***
+# SIMP 6.2    4.10  2.1.9  TBD
+# PE 2017.2   4.10  2.1.9  2018-02
+# PE 2017.3   5.3   2.4.1  2018-08
+# PE 2018.1   5.5   2.4.1  2020-05 (LTS)
+#
+# *** = Modules created for SIMP 6.2+ are not required to support Puppet < 4.10
+---
+language: ruby
+cache: bundler
+sudo: false
+
+bundler_args: --without development system_tests --path .vendor
+
+notifications:
+  email: false
+
+addons:
+  apt:
+    packages:
+      - rpm
+
+before_install:
+  - rm -f Gemfile.lock
+  - gem update --system
+
+jobs:
+  allow_failures:
+    - env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 5.0"
+    # These versions are allowed to fail for the purposes of SIMP-5125
+    # FIXME: Fixing these failures will be addressed in a follow-on issue.
+    - env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 5.3.2"
+    - env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 5.5.1"
+
+  include:
+    - stage: check
+      rvm: 2.4.1
+      script:
+        - bundle exec rake check:dot_underscore
+        - bundle exec rake check:test_file
+        - bundle exec rake lint
+        - bundle exec rake metadata_lint
+        - bundle exec rake pkg:check_version
+        - bundle exec rake pkg:compare_latest_tag
+        - bundle exec rake pkg:create_tag_changelog
+        - bundle exec puppet module build
+
+    - stage: spec
+      rvm: 2.1.9
+      env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 4.7.1"
+      script:
+        - bundle exec rake spec
+
+    - stage: spec
+      rvm: 2.1.9
+      env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 4.8.2"
+      script:
+        - bundle exec rake spec
+
+    - stage: spec
+      rvm: 2.1.9
+      env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 4.10.4"
+      script:
+        - bundle exec rake spec
+
+    - stage: spec
+      rvm: 2.4.1
+      env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 5.3.2"
+      script:
+        - bundle exec rake spec
+
+    - stage: spec
+      rvm: 2.4.4
+      env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 5.5.1"
+      script:
+        - bundle exec rake spec
+
+    # Check latest 5.x release, regardless of support matrix (allowed to fail)
+    - stage: spec
+      rvm: 2.4.4
+      env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 5.0"
+      script:
+        - bundle exec rake spec
+
+    - stage: deploy
+      rvm: 2.4.4
+      script:
+        - true
+      before_deploy:
+        - "export PUPMOD_METADATA_VERSION=`ruby -r json -e \"puts JSON.parse(File.read('metadata.json')).fetch('version')\"`"
+        - '[[ $TRAVIS_TAG =~ ^simp-${PUPMOD_METADATA_VERSION}$|^${PUPMOD_METADATA_VERSION}$ ]]'
+      deploy:
+        - provider: releases
+          api_key:
+            secure: "Zpj1dYG0CdsLEkaXac9M4SwtH8u6G57ZQfvEKB0eUsFOfiP1Q+qPa0t5Zp2MK0GpuiDETNpcDOR2cK0lfx8Yv09EN4dZo8ImtB8B6LiJOIu+fby39mWML0bXZSJ07HtOg0GsHs8XDhs4Jl6ETqhwOTe7l54zBen+VY0h/OMcF5itQajwPfRbRVIjuDErItxRCTtq2p9tGMb4IcdhO3RiBiKNC+rSMV/fd7O8VUdpuLhrSGHrUhyoBgnxDZCM1UN23S+/bMzsiZOhyraM/EX7GNv8+7FQPReOrpBWdamJxhABIw2rkSB25FmTBPfvNC32+HtCKu1Cag70Mn08I+uXdesY8hzCefcSySUIbI8wgIPqsPCuLvvzM1mRRPJ86J8zCcmwQw1nwqNe7mFmwgURVFCAxiP7Pibvh+eC2koFQnuZhvZk17agiJNDUQ539UIGhc4/hb2M4PUuLip7PruMMWW+S6UBexrPImLKu1SjlSq2zAPZkJawl6ng3ctNXhgSjUD6tLojd3C/vIB2HhwzxqGr48Ct319PoAhOzTF8PTBJNOfAw5m/Z//0JDTLAqWDyEQ9pg+CSg3y+kbOm6qDtuzJYSwomupD5z8EbyDE5W7c9d9k5wI6f+vkTeFwDGcdIBGlwYJPd7PXAT5Golf5083AAVP6RLEKvwCDBe0T8uI="
+          skip_cleanup: true
+          on:
+            tags: true
+            condition: '($SKIP_FORGE_PUBLISH != true)'
+        - provider: puppetforge
+          user: simp
+          password:
+            secure: "LBBYg2vKjWhAOILc/bhgV2ybDEt+JJfZ0mp/pIHb4QaWOnRmdOs5bgSiDrK6a/SLk4W5LNSRTOyLqz5oSO5OvtEC/go/8RndsVq5UJM72/TbmSLdTAUQSTVAYZ3NVY2x5FG3BLtzb1XeCyR7oHSrKvgra4UNG68euebltmANVkF1Ly1Bx8LE/5PK/1CY8bmbhHRCFugAkFkalXVmY6EV65S23vyrkN1nV2Xu+i7y9ewpnECsG7sdduvP/AO7PgGuVX/A4sfw9i8ZOGhfKUxS6xeYmlmT6YdbSlRclwoVqhsLX3lmtbXUGNSWwpoWcOm2kk/t369i2SicD6QIitpQoC9OwlNBsaRTp6cfanyIpNsp1WBOStQLsT2wJUzxrWPs4qGiBBDocGb5Iwv9cNyKFS2ydK/NHGX3EC6JQsORM/3ogkEOtEsgg+ad1FHyxg4fyEMt8339fG2ri58gYyib6KkJTRxM8aBkw/uGOQFFDecF69+Bl6kI4ymAEvxpgwJKBncF2z2IMs7e953Q/fXp4p3vToTRiFGUqeL18vUCmMlmVXlPu5dW/STuMVTJiY1f+0PdY8RLn2IOD8O4tC9OaO30R2DPnLwK3kGKS8zjbcSwkzb8rLGqMWBDTV8iv3EAQ/8FtWhZFk39LDrDvRJLzk9WQRrhaorMGvEt8pJHdxA="
+          on:
+            tags: true
+            rvm: 2.4.4
+            condition: '($SKIP_FORGE_PUBLISH != true)'
