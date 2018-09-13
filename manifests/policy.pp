@@ -73,7 +73,7 @@
 #   Appraises all files **owned by root**
 #
 class ima::policy (
-  Boolean       $manage                      = false,
+  Boolean       $manage                      = true,
   Boolean       $dont_watch_proc             = true,
   Boolean       $dont_watch_sysfs            = true,
   Boolean       $dont_watch_debugfs          = true,
@@ -105,6 +105,8 @@ class ima::policy (
   Boolean       $measure_module_check        = false,
   Boolean       $appraise_fowner             = false,
 ) {
+
+  #include '::ima'
 
   # magic reference is in Kernel documentation Documentation/ABI/testing/ima_policy
   $magic_hash = {

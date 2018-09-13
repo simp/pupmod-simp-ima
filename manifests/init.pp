@@ -4,15 +4,6 @@
 # @param enable
 #   Enable IMA on the system
 #
-# @param manage_appraise
-#   Include the ``ima::appraise`` Class
-#
-# @param manage_policy
-#   Include the ``ima::policy`` Class
-#
-#   * Please read the documentation for that class **carefully**, as it can
-#     cause live filesystems to become read-only until a reboot.
-#
 # @param mount_dir
 #   Where to mount the IMA ``securityfs``
 #
@@ -48,23 +39,22 @@
 #   The size of ``/sys/kernel/security/ima/ascii_runtime_measurements``, in
 #   bytes, that will cause a reboot notification will be sent to the user.
 #
-# @param ensure_packages
-#   Ensure setting for all packages installed by this module
-#
 class ima (
   Boolean                $enable          = true,
-  Boolean                $manage_appraise = false,
-  Boolean                $manage_policy   = false,
   Stdlib::AbsolutePath   $mount_dir       = '/sys/kernel/security',
-  Boolean                $ima_tcb         = true,
   Boolean                $ima_audit       = false,
   Ima::Template          $ima_template    = 'ima-ng',
   String[1]              $ima_hash        = 'sha256',
+  Boolean                $ima_tcb         = true,
   Integer[1]             $log_max_size    = 30000000,
-  Simplib::PackageEnsure $ensure_packages = simplib::lookup('simp_options::package_ensure', { 'default_value' => 'installed' })
 ) {
 
   if $enable {
+
+    # Be very careful with this class it could make the system read-only
+    include '::ima::policy'
+    include '::ima::appraise'
+
     if $facts['cmdline']['ima'] == 'on' {
       mount { $mount_dir:
         ensure   => mounted,
@@ -78,7 +68,6 @@ class ima (
         pass     => '0'
       }
     }
-
 
     kernel_parameter { 'ima':
       value    => 'on',
@@ -117,15 +106,6 @@ class ima (
       }
     }
 
-    # Be very careful with this class it could make the system read-only
-    if $manage_policy {
-      include '::ima::policy'
-    }
-
-    if $manage_appraise {
-      include '::ima::appraise'
-    }
-
     if $facts['ima_log_size'] {
       if $facts['ima_log_size'] >= $log_max_size {
         reboot_notify { 'ima_log':
@@ -135,11 +115,7 @@ class ima (
     }
   }
   else {
-    kernel_parameter { 'ima_tcb':
-      ensure   => 'absent',
-      bootmode => 'normal'
-    }
-    kernel_parameter { [ 'ima', 'ima_audit', 'ima_template', 'ima_hash' ]:
+    kernel_parameter { [ 'ima', 'ima_audit', 'ima_template', 'ima_hash', 'ima_tcb' ]:
       ensure   => 'absent',
       bootmode => 'normal'
     }

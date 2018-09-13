@@ -26,10 +26,23 @@ class ima::appraise::relabel(
   Stdlib::AbsolutePath  $relabel_file,
   Stdlib::AbsolutePath  $scriptdir = $ima::appraise::scriptdir,
 ){
+  assert_private()
 
   case  $facts['ima_security_attr'] {
     'inactive': {
-      include 'ima::appraise::enforcemode'
+      kernel_parameter { 'ima_appraise':
+        value    => 'enforce',
+        bootmode => 'normal',
+        notify   => [ Reboot_notify['ima_appraise_enforce_reboot'], Exec['dracut ima appraise rebuild']]
+      }
+      reboot_notify { 'ima_appraise_enforce_reboot':
+        subscribe => Kernel_parameter['ima_appraise']
+      }
+      exec { 'dracut ima appraise rebuild':
+        command     => '/sbin/dracut -f',
+        subscribe   => Kernel_parameter['ima_appraise'],
+        refreshonly => true
+      }
     }
     'active': {
       notify {'IMA updates running':

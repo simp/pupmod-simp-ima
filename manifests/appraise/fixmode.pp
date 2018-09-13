@@ -4,6 +4,7 @@ class ima::appraise::fixmode(
   StdLib::AbsolutePath $relabel_file,
   Boolean              $relabel
 ){
+  assert_private()
 
   kernel_parameter { 'ima_appraise':
     value    => 'fix',

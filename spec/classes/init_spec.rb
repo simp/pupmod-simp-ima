@@ -14,8 +14,15 @@ describe 'ima' do
       context 'with default params' do
         it { is_expected.to compile.with_all_deps }
         it { is_expected.to create_class('ima') }
+        it { is_expected.to contain_class('ima::appraise') }
+        it { is_expected.to contain_class('ima::policy') }
         it { is_expected.not_to contain_reboot_notify('ima_log') }
-        # it { is_expected.not_to contain_class('::ima::policy') }
+        it { is_expected.to contain_kernel_parameter('ima').with_value('on') }
+        it { is_expected.to contain_kernel_parameter('ima').with_bootmode('normal') }
+        it { is_expected.to contain_kernel_parameter('ima_audit').with_value('0') }
+        it { is_expected.to contain_kernel_parameter('ima_audit').with_bootmode('normal') }
+        it { is_expected.to contain_kernel_parameter('ima_tcb') }
+        it { is_expected.to contain_kernel_parameter('ima_tcb').with_bootmode('normal') }
 
         it do
           is_expected.to contain_mount('/sys/kernel/security').with(
@@ -42,15 +49,6 @@ describe 'ima' do
         it { is_expected.to contain_reboot_notify('ima_log') }
       end
 
-      context 'should only manage ima policy when asked' do
-        let(:params) {{
-          enable:        true,
-          manage_policy: true,
-        }}
-        it { is_expected.to compile.with_all_deps }
-        it { is_expected.to contain_class('ima::policy') }
-      end
-
       context 'with kernel version >= 3.13' do
         let(:facts) do
           os_facts.merge({
@@ -65,8 +63,7 @@ describe 'ima' do
           ima_audit:     false,
           ima_template:  'ima-ng',
           ima_hash:      'sha256',
-          ima_tcb:       true,
-          manage_policy: false,
+          ima_tcb:       true
         }}
 
         it { is_expected.to compile.with_all_deps }
@@ -81,6 +78,7 @@ describe 'ima' do
         it { is_expected.to contain_kernel_parameter('ima_hash').with_value(params[:ima_hash]) }
         it { is_expected.to contain_kernel_parameter('ima_hash').with_bootmode('normal') }
         it { is_expected.to contain_kernel_parameter('ima_tcb') }
+        it { is_expected.to contain_kernel_parameter('ima_tcb').with_bootmode('normal') }
       end
 
       context 'with_kernel_version < 3.13' do
@@ -108,6 +106,29 @@ describe 'ima' do
         it { is_expected.to contain_kernel_parameter('ima_hash').with_bootmode('normal') }
         it { is_expected.to contain_kernel_parameter('ima_audit').with_value('1') }
         it { is_expected.to contain_kernel_parameter('ima_tcb') }
+      end
+
+      context 'with enable set to false' do
+        let(:facts) do
+          os_facts.merge(
+            cmdline:      { 'ima' => 'on' },
+          )
+        end
+
+        let(:params) {{ enable: false }}
+
+        it { is_expected.to compile.with_all_deps }
+        it { is_expected.to contain_reboot_notify('ima_reboot') }
+        it { is_expected.to create_kernel_parameter('ima').with_ensure('absent') }
+        it { is_expected.to create_kernel_parameter('ima').with_bootmode('normal') }
+        it { is_expected.to create_kernel_parameter('ima_tcb').with_ensure('absent') }
+        it { is_expected.to create_kernel_parameter('ima_tcb').with_bootmode('normal') }
+        it { is_expected.to create_kernel_parameter('ima_audit').with_ensure('absent') }
+        it { is_expected.to create_kernel_parameter('ima_audit').with_bootmode('normal') }
+        it { is_expected.to create_kernel_parameter('ima_template').with_ensure('absent') }
+        it { is_expected.to create_kernel_parameter('ima_template').with_bootmode('normal') }
+        it { is_expected.to create_kernel_parameter('ima_hash').with_ensure('absent') }
+        it { is_expected.to create_kernel_parameter('ima_hash').with_bootmode('normal') }
       end
 
     end

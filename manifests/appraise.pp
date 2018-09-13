@@ -9,15 +9,13 @@
 #
 # (TODO: check for this and set if possible)
 #
-# Then include the ``ima`` module in your classes and set the following in Hiera:
+# Then include the ``ima::appraise`` module in your classes and set the following in Hiera:
 #
 #   # enable IMA Appraisal
-#   ima::manage_appraise: true
 #   ima::appraise::enable: true
 #
-#   # It is also recommended although not necessary, to enable the management of
+#   # It is also recommended, although not necessary, to enable the management of
 #   # the ima policy because the default policy is over zealous
-#   ima::manage_policy: true
 #   ima::policy::manage: true
 #
 # When ``puppet`` runs it will configure the system to reboot into ``ima_appraise`` mode ``fix``.
@@ -54,9 +52,6 @@
 #   update didn't run. You can fix this by rebooting without the ``ima`` kernel
 #   settings, running ``dracut -f`` and then rebooting in ``ima`` ``appraise``
 #   mode.
-#   
-# @param ensure_packages
-#   Ensure setting for all packages installed by this module
 #
 # @param enable
 #   Enable IMA appraise capability
@@ -70,15 +65,18 @@
 # @param force_fixmode
 #   This will force the system into ``fix_mode`` so you can update files and
 #   then relabel the system - requires a reboot.
+#   
+# @param ensure_packages
+#   Ensure setting for all packages installed by this module
 #
 # @author SIMP Team  <https://simp-project.com/>
 #
 class ima::appraise(
-  Simplib::PackageEnsure $ensure_packages = $::ima::ensure_packages,
   Boolean                $enable          = true,
   Stdlib::AbsolutePath   $relabel_file    = "${facts['puppet_vardir']}/simp/.ima_relabel",
   Stdlib::AbsolutePath   $scriptdir       = '/usr/local/bin',
   Boolean                $force_fixmode   = false,
+  Simplib::PackageEnsure $ensure_packages = simplib::lookup('simp_options::package_ensure', { 'default_value' => 'installed' })
 ){
 
   if $enable {
@@ -86,6 +84,7 @@ class ima::appraise(
     package { 'attr':
       ensure => $ensure_packages
     }
+
     # Provides the utility to set the security.ima attributes.
     package { 'ima-evm-utils':
       ensure => $ensure_packages
@@ -100,12 +99,14 @@ class ima::appraise(
       value    => 'i_version',
       bootmode => 'normal'
     }
+
     file { "${scriptdir}/ima_security_attr_update.sh":
       ensure => file,
       owner  => 'root',
       mode   => '0700',
       source => "puppet:///modules/${module_name}/ima_security_attr_update.sh"
     }
+
     # check if ima_apprasal is set on the boot cmdline
     if $force_fixmode {
       class { 'ima::appraise::fixmode':
