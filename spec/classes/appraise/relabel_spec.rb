@@ -13,7 +13,7 @@ describe 'ima::appraise' do
 
       let (:default_facts) do
         os_facts.merge({
-          :cmdline => { 'ima_appraise' => 'fix' }
+          :cmdline => { 'ima' => 'on', 'ima_appraise' => 'fix' }
         })
       end
 

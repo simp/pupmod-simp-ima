@@ -7,6 +7,12 @@ describe 'ima::appraise' do
   on_supported_os.each do |os, os_facts|
     context "on #{os}" do
 
+      let (:facts) do
+        os_facts.merge({
+          :cmdline => { 'ima' => 'on' },
+        })
+      end
+
       context 'with relabel false' do
         let (:params) {{
           relabel_file: '/tmp/simp/.ima_relabel',
@@ -24,8 +30,7 @@ describe 'ima::appraise' do
       context 'with relabel true' do
         let (:facts) do
           os_facts.merge({
-          #default_facts.merge({
-            :cmdline => { 'foo' => 'bar', 'ima_appraise' => 'off' }
+            :cmdline => { 'ima' => 'on', 'foo' => 'bar', 'ima_appraise' => 'off' }
           })
         end
         let (:params) {{

@@ -22,6 +22,7 @@ describe 'ima::policy' do
         context 'nothing else set' do
           it { is_expected.to compile.with_all_deps }
           it { is_expected.to create_class('ima::policy') }
+          it { is_expected.to contain_class('ima') }
           it { is_expected.to create_file('/etc/ima').with_ensure('directory') }
           it { is_expected.to create_file('/etc/ima/policy.conf') \
             .with_content(IO.read('spec/files/default_ima_policy.conf')) }
@@ -30,7 +31,7 @@ describe 'ima::policy' do
           if os_facts[:operatingsystemmajrelease].to_s == '6'
             it { is_expected.to create_file('/etc/init.d/import_ima_rules').with({
               :ensure => 'file'
-            })}
+            }) }
             it { is_expected.to create_service('import_ima_rules').with({
               :ensure  => 'stopped',
               :enable  => true,

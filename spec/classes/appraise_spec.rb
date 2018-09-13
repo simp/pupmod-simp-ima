@@ -3,6 +3,7 @@ require 'spec_helper'
 shared_examples_for 'an ima appraise enabled system' do
   it { is_expected.to compile.with_all_deps }
   it { is_expected.to create_class('ima::appraise') }
+  it { is_expected.to contain_class('ima') }
   it { is_expected.to create_package('attr') }
   it { is_expected.to create_package('ima-evm-utils') }
   it { is_expected.to create_kernel_parameter('ima_appraise_tcb') }
@@ -22,6 +23,7 @@ describe 'ima::appraise' do
       let (:default_facts) do
         os_facts.merge({
           :puppet => { :vardir =>  '/tmp'},
+          :cmdline => { 'ima' => 'on' }
         })
       end
 
@@ -103,6 +105,11 @@ describe 'ima::appraise' do
           scriptdir: '/myscripts',
           force_fixmode: true
         }}
+        let (:facts) do 
+          os_facts.merge({ 
+          :cmdline => { 'ima' => 'on' }
+          })
+        end
         it_should_behave_like 'an ima appraise enabled system'
         it { is_expected.to contain_class('ima::appraise::fixmode').with({
           'relabel' => false  })}
@@ -116,6 +123,11 @@ describe 'ima::appraise' do
           scriptdir: '/myscripts',
           relabel_file:   '/tmp/relabel'
         }}
+        let (:facts) do 
+          os_facts.merge({ 
+          :cmdline => { 'ima' => 'on' }
+          })
+        end
         it { is_expected.to create_kernel_parameter('ima_appraise_tcb').with({
           'ensure' => 'absent'
         })}

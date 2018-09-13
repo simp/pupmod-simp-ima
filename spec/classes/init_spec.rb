@@ -14,8 +14,6 @@ describe 'ima' do
       context 'with default params' do
         it { is_expected.to compile.with_all_deps }
         it { is_expected.to create_class('ima') }
-        it { is_expected.to contain_class('ima::appraise') }
-        it { is_expected.to contain_class('ima::policy') }
         it { is_expected.not_to contain_reboot_notify('ima_log') }
         it { is_expected.to contain_kernel_parameter('ima').with_value('on') }
         it { is_expected.to contain_kernel_parameter('ima').with_bootmode('normal') }

@@ -51,10 +51,6 @@ class ima (
 
   if $enable {
 
-    # Be very careful with this class it could make the system read-only
-    include '::ima::policy'
-    include '::ima::appraise'
-
     if $facts['cmdline']['ima'] == 'on' {
       mount { $mount_dir:
         ensure   => mounted,

@@ -78,8 +78,10 @@ class ima::appraise(
   Boolean                $force_fixmode   = false,
   Simplib::PackageEnsure $ensure_packages = simplib::lookup('simp_options::package_ensure', { 'default_value' => 'installed' })
 ){
+  include '::ima'
 
   if $enable {
+
     # Provides ability to check for special attributes
     package { 'attr':
       ensure => $ensure_packages

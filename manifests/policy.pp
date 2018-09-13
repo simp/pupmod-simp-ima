@@ -106,7 +106,7 @@ class ima::policy (
   Boolean       $appraise_fowner             = false,
 ) {
 
-  #include '::ima'
+  include '::ima'
 
   # magic reference is in Kernel documentation Documentation/ABI/testing/ima_policy
   $magic_hash = {

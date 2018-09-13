@@ -65,7 +65,8 @@ This module will:
 
 ```yaml
 classes:
-  - ima
+  - ima::appraise
+  - ima::policy
 ```
 
 To remove IMA, first disable components by adding this to hiera:
@@ -73,12 +74,10 @@ To remove IMA, first disable components by adding this to hiera:
 ```yaml
 ima::policy::enable: false
 ima::appraise::enable: false
-```
-
-Then disable the module by adding the following to hiera:
-```yaml
 ima::enable: false
 ```
+
+This removes systems parameters managed IMA.  The classes can then be removed.
 
 ## Usage
 
