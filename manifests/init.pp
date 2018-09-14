@@ -88,7 +88,8 @@ class ima (
         value    => $ima_hash,
         bootmode => 'normal'
       }
-    } else {
+    }
+    else {
       kernel_parameter { [ 'ima_template', 'ima_hash' ]:
         ensure   => 'absent',
         bootmode => 'normal'
@@ -126,5 +127,4 @@ class ima (
       Kernel_parameter['ima_hash']
     ]
   }
-
 }

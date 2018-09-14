@@ -19,7 +19,8 @@ class ima::appraise::fixmode(
       mode    => '0600',
       content => 'relabel'
     }
-  } else {
+  }
+  else {
     file { $relabel_file:
       ensure => 'absent'
     }
@@ -30,5 +31,4 @@ class ima::appraise::fixmode(
       Kernel_parameter['ima_appraise'],
     ]
   }
-
 }

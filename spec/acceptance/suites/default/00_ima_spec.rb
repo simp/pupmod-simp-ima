@@ -55,9 +55,10 @@ describe 'ima class' do
         class { 'ima::policy':
           measure_root_read_files => true,
           measure_file_mmap       => true,
-          measure_bprm_check      => true,
+          # This breaks 'puppet apply' immediately
+          measure_bprm_check      => false,
           measure_module_check    => true,
-          appraise_fowner         => true,
+          appraise_fowner         => true
         }
       EOF
 

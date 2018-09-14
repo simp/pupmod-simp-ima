@@ -26,8 +26,6 @@ describe 'ima::policy' do
           it { is_expected.to create_file('/etc/ima').with_ensure('directory') }
           it { is_expected.to create_file('/etc/ima/policy.conf') \
             .with_content(IO.read('spec/files/default_ima_policy.conf')) }
-          it { is_expected.to create_exec('load_ima_policy') \
-            .with_command('cat /etc/ima/policy.conf > /sys/kernel/security/ima/policy') }
           if os_facts[:operatingsystemmajrelease].to_s == '6'
             it { is_expected.to create_file('/etc/init.d/import_ima_rules').with({
               :ensure => 'file'
@@ -38,6 +36,31 @@ describe 'ima::policy' do
             }) }
           else
             it { is_expected.to create_exec('systemd_load_policy') }
+          end
+
+          context 'with ima enabled' do
+            if os_facts[:operatingsystemmajrelease].to_s == '6'
+              let(:facts) do
+                os_facts.merge({
+                  :init_systems => ['sysv'],
+                  :cmdline => {
+                    :ima => 'on'
+                  }
+                })
+              end
+            else
+              let(:facts) do
+                os_facts.merge({
+                  :init_systems => ['systemd'],
+                  :cmdline => {
+                    :ima => 'on'
+                  }
+                })
+              end
+            end
+
+            it { is_expected.to create_exec('load_ima_policy') \
+              .with_command('cat /etc/ima/policy.conf > /sys/kernel/security/ima/policy') }
           end
         end
 

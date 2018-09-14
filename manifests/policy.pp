@@ -155,8 +155,7 @@ class ima::policy (
       owner   => 'root',
       mode    => '0640',
       content => template("${module_name}/ima_policy.conf.erb"),
-      require => File['/etc/ima'],
-      notify  => Exec['load_ima_policy']
+      require => File['/etc/ima']
     }
 
     if member($facts['init_systems'], 'systemd') {
@@ -176,9 +175,10 @@ class ima::policy (
         command => 'ln /etc/ima/policy.conf /etc/ima/ima-policy.systemd',
         creates => '/etc/ima/ima-policy.systemd',
         path    => '/sbin:/bin:/usr/sbin:/usr/bin',
-        require => File['/etc/ima/policy.conf'],
+        require => File['/etc/ima/policy.conf']
       }
-    } else {
+    }
+    else {
       file { '/etc/init.d/import_ima_rules':
         ensure => file,
         mode   => '0755',
@@ -190,13 +190,18 @@ class ima::policy (
         require => File['/etc/init.d/import_ima_rules']
       }
     }
-    exec { 'load_ima_policy':
-      command     => 'cat /etc/ima/policy.conf > /sys/kernel/security/ima/policy',
-      refreshonly => true,
-      path        => '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
-      require     => File['/etc/ima/policy.conf'],
+
+    if $facts['cmdline']['ima'] == 'on' {
+      exec { 'load_ima_policy':
+        command     => 'cat /etc/ima/policy.conf > /sys/kernel/security/ima/policy',
+        refreshonly => true,
+        path        => '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
+        subscribe   => File['/etc/ima/policy.conf'],
+        require     => Class['ima']
+      }
     }
-  } else {
+  }
+  else {
 
     if member($facts['init_systems'], 'systemd') {
 
@@ -207,7 +212,8 @@ class ima::policy (
         ensure => stopped,
         enable => false,
       }
-    } else {
+    }
+    else {
       file { '/etc/init.d/import_ima_rules':
         ensure => absent,
       }

@@ -63,7 +63,7 @@
 # @param force_fixmode
 #   This will force the system into ``fix_mode`` so you can update files and
 #   then relabel the system - requires a reboot.
-#   
+#
 # @param ensure_packages
 #   Ensure setting for all packages installed by this module
 #
@@ -113,7 +113,8 @@ class ima::appraise(
         relabel_file => $relabel_file,
         relabel      => false
       }
-    } else {
+    }
+    else {
       case $facts['cmdline']['ima_appraise'] {
         'fix': {
           class { 'ima::appraise::relabel':
@@ -137,7 +138,8 @@ class ima::appraise(
             file { $relabel_file:
               ensure => absent
             }
-          } else {
+          }
+          else {
           # It is being turned on and should be set to fix mode
             class { 'ima::appraise::fixmode':
               relabel_file => $relabel_file,
@@ -147,7 +149,8 @@ class ima::appraise(
         }
       }
     }
-  } else {
+  }
+  else {
   # If ima_appraise disabled
     kernel_parameter { ['ima_appraise', 'ima_appraise_tcb']:
       ensure   => absent,
