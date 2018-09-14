@@ -8,6 +8,10 @@
 # @see Kernel documentation Documentation/ABI/testing/ima_policy
 # @see https://git.kernel.org/cgit/linux/kernel/git/stable/linux-stable.git/tree/Documentation/ABI/testing/ima_policy?id=refs/tags/v3.10.103
 #
+# @param manage
+#   Manage IMA policy capability.  Setting to false will stop IMA policy
+#   services on the system.
+#
 # @param dont_watch_proc
 #   Disable IMA hashing of ``procfs`` filesystems
 #

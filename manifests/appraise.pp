@@ -9,14 +9,11 @@
 #
 # (TODO: check for this and set if possible)
 #
-# Then include the ``ima::appraise`` module in your classes and set the following in Hiera:
+# Then include the ``ima::appraise`` module in your classes.
 #
-#   # enable IMA Appraisal
-#   ima::appraise::enable: true
-#
-#   # It is also recommended, although not necessary, to enable the management of
-#   # the ima policy because the default policy is over zealous
-#   ima::policy::manage: true
+#   # It is also recommended, although not necessary, to enable the management of the ima
+#   # policy by including the ``ima::policy`` module in you classes because the default
+#   #  policy is over zealous
 #
 # When ``puppet`` runs it will configure the system to reboot into ``ima_appraise`` mode ``fix``.
 #
@@ -54,7 +51,8 @@
 #   mode.
 #
 # @param enable
-#   Enable IMA appraise capability
+#   Enable IMA appraise capability.  Setting to false will remove IMA appraise
+#   boot settings from the system.
 #
 # @param relabel_file
 #   The file to touch when the file system needs relabeling
