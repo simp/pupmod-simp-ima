@@ -1,3 +1,6 @@
+* Fri Sep 14 2018 Michael Morrone <michael.morrone@onypoint.com> - 0.1.1-0
+- Made ima::appraise and ima::policy unambiguously public classes
+
 * Thu Aug 09 2018 Michael Morrone <michael.morrone@onypoint.com> - 0.1.0-0
 - Initial module
 - Originially developed in SIMP TPM module

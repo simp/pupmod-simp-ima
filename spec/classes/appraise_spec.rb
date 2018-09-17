@@ -2,9 +2,14 @@ require 'spec_helper'
 
 shared_examples_for 'an ima appraise enabled system' do
   it { is_expected.to compile.with_all_deps }
+  it { is_expected.to create_class('ima::appraise') }
+  it { is_expected.to contain_class('ima') }
   it { is_expected.to create_package('attr') }
   it { is_expected.to create_package('ima-evm-utils') }
-  it { is_expected.to create_kernel_parameter('ima_appraise_tcb')}
+  it { is_expected.to create_kernel_parameter('ima_appraise_tcb') }
+  it { is_expected.to create_kernel_parameter('ima_appraise_tcb').with_bootmode('normal') }
+  it { is_expected.to create_kernel_parameter('rootflags').with_value('i_version') }
+  it { is_expected.to create_kernel_parameter('rootflags').with_bootmode('normal') }
   it { is_expected.to create_file('/myscripts/ima_security_attr_update.sh').with({
     'source' => 'puppet:///modules/ima/ima_security_attr_update.sh'
   })}
@@ -18,6 +23,7 @@ describe 'ima::appraise' do
       let (:default_facts) do
         os_facts.merge({
           :puppet => { :vardir =>  '/tmp'},
+          :cmdline => { 'ima' => 'on' }
         })
       end
 
@@ -36,7 +42,8 @@ describe 'ima::appraise' do
           end
           it_should_behave_like 'an ima appraise enabled system'
           it { is_expected.to contain_class('ima::appraise::fixmode').with({
-            'relabel' => true  })}
+            'relabel' => true  
+          })}
         end
 
         context 'with ima_appraise not set but ima_appraise_tcb set' do
@@ -89,22 +96,26 @@ describe 'ima::appraise' do
           it { is_expected.to contain_class('ima::appraise::fixmode').with({
             'relabel' => true  })}
           it { is_expected.to_not contain_class('ima::appraise::relabel') }
-          it_should_behave_like 'an ima appraise enabled system'
         end
       end
 
-      context 'with  fix_mode set to true' do
+      context 'with fix_mode set to true' do
         let (:params) {{
           relabel_file: '/tmp/relabel',
           scriptdir: '/myscripts',
-          force_fixmode: true,
-          ensure_packages: 'installed'
+          force_fixmode: true
         }}
+        let (:facts) do 
+          os_facts.merge({ 
+          :cmdline => { 'ima' => 'on' }
+          })
+        end
         it_should_behave_like 'an ima appraise enabled system'
         it { is_expected.to contain_class('ima::appraise::fixmode').with({
           'relabel' => false  })}
         it { is_expected.to_not contain_class('ima::appraise::relabel') }
       end
+
       context 'with enable set to false' do
         let (:params) {{
           enable: false,
@@ -112,7 +123,11 @@ describe 'ima::appraise' do
           scriptdir: '/myscripts',
           relabel_file:   '/tmp/relabel'
         }}
-
+        let (:facts) do 
+          os_facts.merge({ 
+          :cmdline => { 'ima' => 'on' }
+          })
+        end
         it { is_expected.to create_kernel_parameter('ima_appraise_tcb').with({
           'ensure' => 'absent'
         })}

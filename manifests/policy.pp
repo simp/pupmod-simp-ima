@@ -8,6 +8,10 @@
 # @see Kernel documentation Documentation/ABI/testing/ima_policy
 # @see https://git.kernel.org/cgit/linux/kernel/git/stable/linux-stable.git/tree/Documentation/ABI/testing/ima_policy?id=refs/tags/v3.10.103
 #
+# @param manage
+#   Manage IMA policy capability.  Setting to false will stop IMA policy
+#   services on the system.
+#
 # @param dont_watch_proc
 #   Disable IMA hashing of ``procfs`` filesystems
 #
@@ -73,7 +77,7 @@
 #   Appraises all files **owned by root**
 #
 class ima::policy (
-  Boolean       $manage                      = false,
+  Boolean       $manage                      = true,
   Boolean       $dont_watch_proc             = true,
   Boolean       $dont_watch_sysfs            = true,
   Boolean       $dont_watch_debugfs          = true,
@@ -105,6 +109,8 @@ class ima::policy (
   Boolean       $measure_module_check        = false,
   Boolean       $appraise_fowner             = false,
 ) {
+
+  include '::ima'
 
   # magic reference is in Kernel documentation Documentation/ABI/testing/ima_policy
   $magic_hash = {
@@ -149,8 +155,7 @@ class ima::policy (
       owner   => 'root',
       mode    => '0640',
       content => template("${module_name}/ima_policy.conf.erb"),
-      require => File['/etc/ima'],
-      notify  => Exec['load_ima_policy']
+      require => File['/etc/ima']
     }
 
     if member($facts['init_systems'], 'systemd') {
@@ -170,9 +175,10 @@ class ima::policy (
         command => 'ln /etc/ima/policy.conf /etc/ima/ima-policy.systemd',
         creates => '/etc/ima/ima-policy.systemd',
         path    => '/sbin:/bin:/usr/sbin:/usr/bin',
-        require => File['/etc/ima/policy.conf'],
+        require => File['/etc/ima/policy.conf']
       }
-    } else {
+    }
+    else {
       file { '/etc/init.d/import_ima_rules':
         ensure => file,
         mode   => '0755',
@@ -184,13 +190,18 @@ class ima::policy (
         require => File['/etc/init.d/import_ima_rules']
       }
     }
-    exec { 'load_ima_policy':
-      command     => 'cat /etc/ima/policy.conf > /sys/kernel/security/ima/policy',
-      refreshonly => true,
-      path        => '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
-      require     => File['/etc/ima/policy.conf'],
+
+    if $facts['cmdline']['ima'] == 'on' {
+      exec { 'load_ima_policy':
+        command     => 'cat /etc/ima/policy.conf > /sys/kernel/security/ima/policy',
+        refreshonly => true,
+        path        => '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
+        subscribe   => File['/etc/ima/policy.conf'],
+        require     => Class['ima']
+      }
     }
-  } else {
+  }
+  else {
 
     if member($facts['init_systems'], 'systemd') {
 
@@ -201,7 +212,8 @@ class ima::policy (
         ensure => stopped,
         enable => false,
       }
-    } else {
+    }
+    else {
       file { '/etc/init.d/import_ima_rules':
         ensure => absent,
       }

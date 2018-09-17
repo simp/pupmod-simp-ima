@@ -65,15 +65,19 @@ This module will:
 
 ```yaml
 classes:
-  - ima
+  - ima::appraise
+  - ima::policy
 ```
 
-To utilize IMA, add this to hiera:
+To remove IMA, first disable components by adding this to hiera:
 
 ```yaml
-ima::manage_policy: true
-ima::manage_appraise: true
+ima::policy::enable: false
+ima::appraise::enable: false
+ima::enable: false
 ```
+
+This removes systems parameters managed IMA.  The classes can then be removed.
 
 ## Usage
 
@@ -86,8 +90,8 @@ module's generated YARD documentation for reference material.
 ## Limitations
 
 SIMP Puppet modules are generally intended for use on Red Hat Enterprise Linux
-and compatible distributions, such as CentOS. Please see the
-[`metadata.json` file](./metadata.json) for the most up-to-date list of
+and compatible distributions, such as CentOS. Please see the file
+[`metadata.json`](./metadata.json) for the most up-to-date list of
 supported operating systems, Puppet versions, and module dependencies.
 
 The default configuration of this module updates EFI boot parameters if they are 
