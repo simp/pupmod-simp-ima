@@ -1,18 +1,16 @@
 # The testing matrix considers ruby/puppet versions supported by SIMP and PE:
 #
-# https://puppet.com/docs/pe/2017.3/overview/component_versions_in_recent_pe_releases.html
+# https://puppet.com/docs/pe/2018.1/component_versions_in_recent_pe_releases.html
 # https://puppet.com/misc/puppet-enterprise-lifecycle
-# https://puppet.com/docs/pe/2017.3/overview/getting_support_for_pe.html#standard-releases-and-long-term-support-releases
+# https://puppet.com/docs/pe/2018.1/overview/getting_support_for_pe.html
 # ------------------------------------------------------------------------------
-#  release    pup   ruby   eol
-# PE 2016.4   4.7   2.1.9  2018-10 (LTS)***
-# SIMP 6.0    4.8   2.1.9  TBD***
-# SIMP 6.2    4.10  2.1.9  TBD
-# PE 2017.2   4.10  2.1.9  2018-02
-# PE 2017.3   5.3   2.4.1  2018-08
-# PE 2018.1   5.5   2.4.1  2020-05 (LTS)
+# Release       Puppet   Ruby   EOL
+# SIMP 6.1      4.10.6   2.1.9  TBD
+# SIMP 6.2      4.10.12  2.1.9  TBD
+# SIMP 6.3      5.5.7    2.4.4  TBD***
+# PE 2018.1     5.5.6    2.4.4  2020-05 (LTS)***
 #
-# *** = Modules created for SIMP 6.2+ are not required to support Puppet < 4.10
+# *** = Modules created for SIMP 6.3+ are not required to support Puppet < 5.5
 ---
 language: ruby
 cache: bundler
@@ -30,63 +28,38 @@ addons:
 
 before_install:
   - rm -f Gemfile.lock
-  - gem update --system
 
 jobs:
-  allow_failures:
-    - env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 5.0"
-    # These versions are allowed to fail for the purposes of SIMP-5125
-    # FIXME: Fixing these failures will be addressed in a follow-on issue.
-    - env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 5.3.2"
-    - env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 5.5.1"
-
   include:
     - stage: check
-      rvm: 2.4.1
+      rvm: 2.4.4
+      env: STRICT_VARIABLES=yes TRUSTED_NODE_DATA=yes PUPPET_VERSION="~> 5"
       script:
         - bundle exec rake check:dot_underscore
         - bundle exec rake check:test_file
-        - bundle exec rake lint
-        - bundle exec rake metadata_lint
         - bundle exec rake pkg:check_version
+        - bundle exec rake metadata_lint
         - bundle exec rake pkg:compare_latest_tag
         - bundle exec rake pkg:create_tag_changelog
+        - bundle exec rake lint
         - bundle exec puppet module build
 
-    - stage: spec
-      rvm: 2.1.9
-      env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 4.7.1"
-      script:
-        - bundle exec rake spec
-
-    - stage: spec
-      rvm: 2.1.9
-      env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 4.8.2"
-      script:
-        - bundle exec rake spec
-
-    - stage: spec
-      rvm: 2.1.9
-      env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 4.10.4"
-      script:
-        - bundle exec rake spec
-
-    - stage: spec
-      rvm: 2.4.1
-      env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 5.3.2"
-      script:
-        - bundle exec rake spec
-
-    - stage: spec
-      rvm: 2.4.4
-      env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 5.5.1"
-      script:
-        - bundle exec rake spec
-
-    # Check latest 5.x release, regardless of support matrix (allowed to fail)
+# Test for latest version
     - stage: spec
       rvm: 2.4.4
       env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 5.0"
+      script:
+        - bundle exec rake spec
+# Test for curent version
+    - stage: spec
+      rvm: 2.4.4
+      env: STRICT_VARIABLES=yes PUPPET_VERSION="~> 5.5.7"
+      script:
+        - bundle exec rake spec
+# Test oldest supported version
+    - stage: spec
+      rvm: 2.1.9
+      env: STRICT_VARIABLES=yes TRUSTED_NODE_DATA=yes PUPPET_VERSION="~> 4.10.0"
       script:
         - bundle exec rake spec
 
