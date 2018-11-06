@@ -11,24 +11,15 @@ HOSTS:
       - server
       - default
     platform:   el-7-x86_64
-    box:        centos/7
+    box:        onyxpoint/oel-7-x86_64
     hypervisor: <%= hypervisor %>
-    yum_repos:
-      epel:
-        mirrorlist: 'https://mirrors.fedoraproject.org/metalink?repo=epel-7&arch=$basearch'
-        gpgkeys:
-          - https://getfedora.org/static/352C64E5.txt
   el6:
     roles:
       - server
     platform:   el-6-x86_64
-    box:        centos/6
+    box:        onyxpoint/oel-6-x86_64
     hypervisor: <%= hypervisor %>
-    yum_repos:
-      epel:
-        mirrorlist: 'https://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=$basearch'
-        gpgkeys:
-          - https://getfedora.org/static/0608B895.txt
+
 CONFIG:
   log_level: verbose
   type:      aio
@@ -39,5 +30,4 @@ CONFIG:
 <% if ENV['BEAKER_PUPPET_COLLECTION'] -%>
   puppet_collection: <%= ENV['BEAKER_PUPPET_COLLECTION'] %>
 <% end -%>
-
 # vb_gui: true
