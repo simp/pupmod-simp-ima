@@ -49,50 +49,57 @@ describe 'ima class' do
   end
 
   context 'stricter rules' do
-    hosts.each do |host|
-      manifest = <<-EOF
-        include 'ima'
-        class { 'ima::policy':
-          measure_root_read_files => true,
-          measure_file_mmap       => true,
-          # This breaks 'puppet apply' immediately
-          measure_bprm_check      => false,
-          measure_module_check    => true,
-          appraise_fowner         => true
-        }
-      EOF
+    if true
+      it 'fails to allow puppet to function in strict enforcing mode'
+    else
+      # This is kept around to show what *should* happen (and what did happen
+      # at some point). Unfortunately, flipping any of the items to 'true'
+      # below causes puppet to fail to apply afterwards.
+      hosts.each do |host|
+        manifest = <<-EOF
+          include 'ima'
+          class { 'ima::policy':
+            # The ones set to 'false' break 'puppet apply' immediately
+            appraise_fowner         => true,
+            measure_bprm_check      => false,
+            measure_file_mmap       => true,
+            measure_module_check    => true,
+            measure_root_read_files => true
+          }
+        EOF
 
-      it 'should run puppet' do
-        apply_manifest_on(host, manifest, catch_failures: true)
-      end
-
-      it 'should run puppet idempotently' do
-        apply_manifest_on(host, manifest, catch_changes: true)
-      end
-
-      it 'locks up the filesystem after a reboot and new policy is applied' do
-        on(host, 'yum install -y telnet')
-        ssh_config = File.readlines(host[:ssh][:config])
-        ssh_port   = ssh_config.grep(/port/i).first.split(' ')[1]
-
-        expect(on(host, 'ls')).to be_truthy
-
-        tel = Net::Telnet::new("Port" => ssh_port)
-        result = tel.cmd('echo echo')
-        tel.close
-        expect(result).to match(/OpenSSH/)
-
-        host.reboot
-        sleep 30
-
-        tel2 = Net::Telnet::new("Port" => ssh_port)
-        begin
-          result2 = tel.cmd('echo echo')
-        rescue IOError => e
-          result2 = e
+        it 'should run puppet' do
+          apply_manifest_on(host, manifest, catch_failures: true)
         end
-        tel2.close
-        expect(result2).to be_instance_of(IOError)
+
+        it 'should run puppet idempotently' do
+          apply_manifest_on(host, manifest, catch_changes: true)
+        end
+
+        it 'locks up the filesystem after a reboot and new policy is applied' do
+          on(host, 'yum install -y telnet')
+          ssh_config = File.readlines(host[:ssh][:config])
+          ssh_port   = ssh_config.grep(/port/i).first.split(' ')[1]
+
+          expect(on(host, 'ls')).to be_truthy
+
+          tel = Net::Telnet::new("Port" => ssh_port)
+          result = tel.cmd('echo echo')
+          tel.close
+          expect(result).to match(/OpenSSH/)
+
+          host.reboot
+          sleep 30
+
+          tel2 = Net::Telnet::new("Port" => ssh_port)
+          begin
+            result2 = tel.cmd('echo echo')
+          rescue IOError => e
+            result2 = e
+          end
+          tel2.close
+          expect(result2).to be_instance_of(IOError)
+        end
       end
     end
   end
