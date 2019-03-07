@@ -118,7 +118,7 @@ ima::policy::appraise_fowner: false
 
 ## Development
 
-Please read our [Contribution Guide](https://simp.readthedocs.io/en/master/contributors_guide/Contribution_Procedure.html)
+Please read our [Contribution Guide](https://simp.readthedocs.io/en/stable/contributors_guide/Contribution_Procedure.html)
 
 
 ### Acceptance tests
