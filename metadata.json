@@ -1,6 +1,6 @@
 {
   "name": "simp-ima",
-  "version": "1.0.0",
+  "version": "0.2.0",
   "author": "SIMP Team",
   "summary": "Manages IMA",
   "license": "Apache-2.0",
@@ -19,10 +19,6 @@
     {
       "name": "simp/simplib",
       "version_requirement": ">= 3.1.0 < 4.0.0"
-    },
-    {
-      "name": "puppetlabs/mount_core",
-      "version_requirement": ">= 1.0.0"
     },
     {
       "name": "puppetlabs/stdlib",
@@ -48,7 +44,7 @@
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 4.7.0 < 7.0.0"
+      "version_requirement": ">= 5.0.0 < 7.0.0"
     }
   ]
 }
