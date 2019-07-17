@@ -1,7 +1,5 @@
 * Tue Jul 16 2019 Robert Vincent <pillarsdotnet@gmail.com> - 0.2.0-0
 - Provide Puppet-6 compatibility.
-
-* Tue Jul 16 2019 Robert Vincent <pillarsdotnet@gmail.com> - 0.1.2-0
 - Facter.value(:cmdline) is not always set.
 
 * Thu Mar 07 2019 Liz Nemsick <lnemsick.simp@gmail.com> - 0.1.1-0
