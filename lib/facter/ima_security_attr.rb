@@ -12,7 +12,7 @@
 #
 Facter.add('ima_security_attr') do
   confine do
-    Facter.value(:cmdline).has_key?('ima_appraise_tcb')
+    Facter.value(:cmdline) && Facter.value(:cmdline).has_key?('ima_appraise_tcb')
   end
 
   setcode do
