@@ -9,15 +9,15 @@ describe 'ima_log_size', :type => :fact do
 
   context 'the required file is not present' do
     it 'should return nil' do
-      File.stubs(:exists?).with('/sys/kernel/security/ima/ascii_runtime_measurements').returns false
+      allow(File).to receive(:exists?).with('/sys/kernel/security/ima/ascii_runtime_measurements').and_return false
       expect(Facter.fact(:ima_log_size).value).to eq nil
     end
   end
 
   context 'the required file is present' do
     it 'should read the contents of the file as an integer' do
-      File.stubs(:exists?).with('/sys/kernel/security/ima/ascii_runtime_measurements').returns true
-      Facter::Core::Execution.stubs(:execute).with('wc -c /sys/kernel/security/ima/ascii_runtime_measurements').returns '1337'
+      allow(File).to receive(:exists?).with('/sys/kernel/security/ima/ascii_runtime_measurements').and_return true
+      allow(Facter::Core::Execution).to receive(:execute).with('wc -c /sys/kernel/security/ima/ascii_runtime_measurements').and_return '1337'
 
       expect(Facter.fact(:ima_log_size).value).to eq 1337
     end

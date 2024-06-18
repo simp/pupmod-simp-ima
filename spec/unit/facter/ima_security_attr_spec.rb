@@ -5,13 +5,13 @@ describe 'ima_security_attr', :type => :fact do
   before :each do
     Facter.clear
     Facter.clear_messages
-    Facter.stubs(:value).with(:cmdline).returns({'ima_appraise_tcb' => "", 'foo' => 'bar' })
-    Facter.stubs(:value).with(:puppet_vardir).returns('/tmp')
+    allow(Facter).to receive(:value).with(:cmdline).and_return({'ima_appraise_tcb' => "", 'foo' => 'bar' })
+    allow(Facter).to receive(:value).with(:puppet_vardir).and_return('/tmp')
   end
 
   context 'The script is running' do
     before :each do
-      Facter::Core::Execution.stubs(:execute).with('ps -ef').returns 'All kinds of junk and ima_security_attr_update.sh'
+      allow(Facter::Core::Execution).to receive(:execute).with('ps -ef').and_return 'All kinds of junk and ima_security_attr_update.sh'
     end
 
     it 'should return updating' do
@@ -20,10 +20,10 @@ describe 'ima_security_attr', :type => :fact do
   end
 
   context 'The script is not running' do
-    before(:each) { Facter::Core::Execution.stubs(:execute).with('ps -ef').returns 'All kinds of junki\nAnd more junk\nbut not that which shall not be named'}
+    before(:each) { allow(Facter::Core::Execution).to receive(:execute).with('ps -ef').and_return 'All kinds of junki\nAnd more junk\nbut not that which shall not be named'}
 
     context 'The relabel file is not present' do
-      before(:each) { File.stubs(:exists?).with('/tmp/simp/.ima_relabel').returns(false) }
+      before(:each) { allow(File).to receive(:exists?).with('/tmp/simp/.ima_relabel').and_return(false) }
 
       it 'should return inactive' do
         expect(Facter.fact(:ima_security_attr).value).to eq 'inactive'
@@ -31,7 +31,7 @@ describe 'ima_security_attr', :type => :fact do
     end
 
     context 'The relabel file is present' do
-      before(:each) { File.stubs(:exists?).with('/tmp/simp/.ima_relabel').returns(true) }
+      before(:each) { allow(File).to receive(:exists?).with('/tmp/simp/.ima_relabel').and_return(true) }
 
       it 'should return inactive' do
         expect(Facter.fact(:ima_security_attr).value).to eq 'need_relabel'
