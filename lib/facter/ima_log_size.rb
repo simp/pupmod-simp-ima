@@ -1,7 +1,7 @@
 # Detects the size of the IMA log in bytes
 Facter.add('ima_log_size') do
   confine do
-    File.exists? '/sys/kernel/security/ima/ascii_runtime_measurements'
+    File.exist? '/sys/kernel/security/ima/ascii_runtime_measurements'
   end
 
   setcode do

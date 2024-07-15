@@ -3,11 +3,10 @@ require 'spec_helper'
 describe 'ima' do
   on_supported_os.each do |os, os_facts|
     context "on #{os}" do
-
       let(:facts) do
         os_facts.merge(
           cmdline:      { 'ima' => 'on' },
-          ima_log_size: 29000000,
+          ima_log_size: 29_000_000,
         )
       end
 
@@ -32,16 +31,16 @@ describe 'ima' do
             remounts: true,
             options:  'defaults',
             dump:     '0',
-            pass:     '0'
+            pass:     '0',
           )
         end
       end
 
       context 'should tell the user to reboot when the ima log is filling up' do
         let(:facts) do
-          os_facts.merge( ima_log_size: 50000002 )
+          os_facts.merge(ima_log_size: 50_000_002)
         end
-        let(:params) {{ log_max_size: 50000000 }}
+        let(:params) { { log_max_size: 50_000_000 } }
 
         it { is_expected.to compile.with_all_deps }
         it { is_expected.to contain_reboot_notify('ima_log') }
@@ -49,20 +48,22 @@ describe 'ima' do
 
       context 'with kernel version >= 3.13' do
         let(:facts) do
-          os_facts.merge({
-            cmdline:      { 'foo' => 'bar' },
-            ima_log_size: 29000000,
-            kernelmajversion: '3.13'
-          })
+          os_facts.merge(
+            cmdline: { 'foo' => 'bar' },
+            ima_log_size: 29_000_000,
+            kernelmajversion: '3.13',
+          )
         end
 
-        let(:params) {{
-          mount_dir:     '/sys/kernel/security',
-          ima_audit:     false,
-          ima_template:  'ima-ng',
-          ima_hash:      'sha256',
-          ima_tcb:       true
-        }}
+        let(:params) do
+          {
+            mount_dir:     '/sys/kernel/security',
+            ima_audit:     false,
+            ima_template:  'ima-ng',
+            ima_hash:      'sha256',
+            ima_tcb:       true,
+          }
+        end
 
         it { is_expected.to compile.with_all_deps }
         it { is_expected.not_to contain_file(params[:mount_dir]) }
@@ -81,18 +82,20 @@ describe 'ima' do
 
       context 'with_kernel_version < 3.13' do
         let(:facts) do
-          os_facts.merge({
+          os_facts.merge(
             cmdline:          { 'foo' => 'bar' },
-            ima_log_size:     29000000,
-            kernelmajversion: '3.10'
-          })
+            ima_log_size:     29_000_000,
+            kernelmajversion: '3.10',
+          )
         end
 
-        let(:params) {{
-          ima_audit:     true,
-          ima_template:  'ima-ng',
-          ima_hash:      'sha256',
-        }}
+        let(:params) do
+          {
+            ima_audit:     true,
+            ima_template:  'ima-ng',
+            ima_hash:      'sha256',
+          }
+        end
 
         it { is_expected.to compile.with_all_deps }
         it { is_expected.to contain_reboot_notify('ima_reboot') }
@@ -109,11 +112,11 @@ describe 'ima' do
       context 'with enable set to false' do
         let(:facts) do
           os_facts.merge(
-            cmdline:      { 'ima' => 'on' },
+            cmdline: { 'ima' => 'on' },
           )
         end
 
-        let(:params) {{ enable: false }}
+        let(:params) { { enable: false } }
 
         it { is_expected.to compile.with_all_deps }
         it { is_expected.to contain_reboot_notify('ima_reboot') }
@@ -128,7 +131,6 @@ describe 'ima' do
         it { is_expected.to create_kernel_parameter('ima_hash').with_ensure('absent') }
         it { is_expected.to create_kernel_parameter('ima_hash').with_bootmode('normal') }
       end
-
     end
   end
 end
