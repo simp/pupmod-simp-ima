@@ -12,21 +12,21 @@
 #
 Facter.add('ima_security_attr') do
   confine do
-    Facter.value(:cmdline) && Facter.value(:cmdline).has_key?('ima_appraise_tcb')
+    Facter.value(:cmdline)&.key?('ima_appraise_tcb')
   end
 
   setcode do
     vardir = Facter.value(:puppet_vardir)
 
-  # Check if the script to update the attributes is still running
+    # Check if the script to update the attributes is still running
     isrunning = Facter::Core::Execution.execute('ps -ef')
     if isrunning['ima_security_attr_update.sh'].nil?
       relabel_file = "#{vardir}/simp/.ima_relabel"
-      if File.exists?("#{relabel_file}")
-        status = 'need_relabel'
-      else
-        status = 'inactive'
-      end
+      status = if File.exist?(relabel_file)
+                 'need_relabel'
+               else
+                 'inactive'
+               end
     else
       status = 'active'
     end
