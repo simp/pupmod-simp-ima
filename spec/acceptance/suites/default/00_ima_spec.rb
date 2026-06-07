@@ -12,8 +12,8 @@ describe 'ima class' do
   end
 
   context 'normal, loose rules' do
-    hosts.each do |host|
-      manifest = <<-EOF
+    let(:manifest) do
+      <<-EOF
         include 'ima'
         include 'ima::policy'
         # class { 'ima::policy':
@@ -21,7 +21,9 @@ describe 'ima class' do
         #   set_with_puppet  => false
         # }
       EOF
+    end
 
+    hosts.each do |host|
       it 'runs puppet' do
         apply_manifest_on(host, manifest, catch_failures: true)
       end
@@ -54,8 +56,8 @@ describe 'ima class' do
       # This is kept around to show what *should* happen (and what did happen
       # at some point). Unfortunately, flipping any of the items to 'true'
       # below causes puppet to fail to apply afterwards.
-      hosts.each do |host|
-        manifest = <<-EOF
+      let(:manifest) do
+        <<-EOF
           include 'ima'
           class { 'ima::policy':
             # The ones set to 'false' break 'puppet apply' immediately
@@ -66,7 +68,9 @@ describe 'ima class' do
             measure_root_read_files => true
           }
         EOF
+      end
 
+      hosts.each do |host|
         it 'runs puppet' do
           apply_manifest_on(host, manifest, catch_failures: true)
         end
@@ -85,7 +89,7 @@ describe 'ima class' do
           tel = Net::Telnet.new('Port' => ssh_port)
           result = tel.cmd('echo echo')
           tel.close
-          expect(result).to match(%r{OpenSSH})
+          expect(result).to include('OpenSSH')
 
           host.reboot
           sleep 30
