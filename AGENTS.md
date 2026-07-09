@@ -29,8 +29,8 @@ Five classes total: three public (`ima`, `ima::policy`, `ima::appraise`) and two
 private (`ima::appraise::fixmode`, `ima::appraise::relabel`, both
 `assert_private()`'d).
 
-- **`ima` (`manifests/init.pp:42-130`)** — public entry class (consumers
-  `include 'ima'`). Parameters (`init.pp:42-50`): `$enable` (`Boolean`, default
+- **`ima` (`manifests/init.pp`)** — public entry class (consumers
+  `include 'ima'`). Parameters (`init.pp`): `$enable` (`Boolean`, default
   `true`), `$mount_dir` (`Stdlib::AbsolutePath`, default
   `/sys/kernel/security`), `$ima_audit` (`Boolean`, default `false`),
   `$ima_template` (`Ima::Template`, default `'ima-ng'`), `$ima_hash`
@@ -38,45 +38,45 @@ private (`ima::appraise::fixmode`, `ima::appraise::relabel`, both
   `$log_max_size` (`Integer[1]`, default `30000000`).
   - When `$enable`: the `securityfs` `mount` is declared **only if the running
     kernel already has `ima=on`** (`$facts['cmdline']['ima'] == 'on'`,
-    `init.pp:54`). `kernel_parameter { 'ima' }` is set to `'on'`
-    (`init.pp:68-71`) and `ima_audit` to `'1'`/`'0'` (`init.pp:73-80`).
+    `init.pp`). `kernel_parameter { 'ima' }` is set to `'on'`
+    (`init.pp`) and `ima_audit` to `'1'`/`'0'` (`init.pp`).
   - `ima_template`/`ima_hash` are only set when
     `versioncmp($facts['kernelmajversion'], '3.13') >= 0`; otherwise they are
-    ensured `absent` (`init.pp:82-97`) — the docstring notes the template is
+    ensured `absent` (`init.pp`) — the docstring notes the template is
     fixed to `ima` on older kernels.
-  - `ima_tcb` is only declared when `$ima_tcb` is true (`init.pp:99-104`).
-  - **IMA log-size guard** (`init.pp:106-112`): if the `ima_log_size` fact
+  - `ima_tcb` is only declared when `$ima_tcb` is true (`init.pp`).
+  - **IMA log-size guard** (`init.pp`): if the `ima_log_size` fact
     (custom, this module) is `>= $log_max_size`, a `reboot_notify { 'ima_log' }`
     is raised telling the operator to reboot to clear the in-kernel measurement
     log.
   - When `!$enable`, `ima`/`ima_audit`/`ima_template`/`ima_hash`/`ima_tcb` are
-    all ensured `absent` (`init.pp:114-119`).
+    all ensured `absent` (`init.pp`).
   - `reboot_notify { 'ima_reboot' }` subscribes to all five kernel parameters
-    (`init.pp:121-129`).
+    (`init.pp`).
 
-- **`ima::policy` (`manifests/policy.pp:79-226`)** — public; `include '::ima'`
-  (`policy.pp:113`). One boolean per filesystem/SELinux context to exclude from
+- **`ima::policy` (`manifests/policy.pp`)** — public; `include '::ima'`
+  (`policy.pp`). One boolean per filesystem/SELinux context to exclude from
   measurement (all default `true`), plus `$dont_watch_list` (extra SELinux
-  contexts, `policy.pp:105`) and `measure_*` / `appraise_fowner` toggles (all
-  default `false`, `policy.pp:106-110`). Two lookup tables — `$magic_hash`
-  (fsmagic numbers, `policy.pp:116-128`) and `$sel_hash` (SELinux log types,
-  `policy.pp:130-144`) — feed the ERB template.
-  - When `$manage` (`policy.pp:146`): creates `/etc/ima` (`0750`) and
+  contexts, `policy.pp`) and `measure_*` / `appraise_fowner` toggles (all
+  default `false`, `policy.pp`). Two lookup tables — `$magic_hash`
+  (fsmagic numbers, `policy.pp`) and `$sel_hash` (SELinux log types,
+  `policy.pp`) — feed the ERB template.
+  - When `$manage` (`policy.pp`): creates `/etc/ima` (`0750`) and
     `/etc/ima/policy.conf` (`0640`, rendered from
     `${module_name}/ima_policy.conf.erb`). If the node's `init_systems` fact
     includes `systemd` it installs `import_ima_rules.service` (enabled but
     `ensure => stopped`) and hard links the policy to
-    `/etc/ima/ima-policy.systemd` via an `exec` (`policy.pp:161-180`); otherwise
-    it installs the SysV `/etc/init.d/import_ima_rules` script (`policy.pp:181-192`).
-  - `exec { 'load_ima_policy' }` (`policy.pp:194-202`) cats the policy into
+    `/etc/ima/ima-policy.systemd` via an `exec` (`policy.pp`); otherwise
+    it installs the SysV `/etc/init.d/import_ima_rules` script (`policy.pp`).
+  - `exec { 'load_ima_policy' }` (`policy.pp`) cats the policy into
     `/sys/kernel/security/ima/policy` — but **only when the running kernel
     already has `ima=on`** and only as a `refreshonly` subscriber to the policy
     file.
-  - When `!$manage` (`policy.pp:204-225`): removes the loader unit/script and
+  - When `!$manage` (`policy.pp`): removes the loader unit/script and
     disables the service.
 
-- **`ima::appraise` (`manifests/appraise.pp:72-169`)** — public; `include
-  '::ima'` (`appraise.pp:79`). Parameters (`appraise.pp:72-78`): `$enable`
+- **`ima::appraise` (`manifests/appraise.pp`)** — public; `include
+  '::ima'` (`appraise.pp`). Parameters (`appraise.pp`): `$enable`
   (default `true`), `$relabel_file` (default
   `${facts['puppet_vardir']}/simp/.ima_relabel`), `$scriptdir` (default
   `/usr/local/bin`), `$force_fixmode` (default `false`), `$ensure_packages`
@@ -84,25 +84,25 @@ private (`ima::appraise::fixmode`, `ima::appraise::relabel`, both
   section below).
   - When `$enable`: installs `attr` and `ima-evm-utils`, sets
     `ima_appraise_tcb` and `rootflags=i_version` kernel parameters, and
-    installs `${scriptdir}/ima_security_attr_update.sh` (`appraise.pp:81-108`).
-  - **State machine** (`appraise.pp:111-151`): if `$force_fixmode`, delegate to
+    installs `${scriptdir}/ima_security_attr_update.sh` (`appraise.pp`).
+  - **State machine** (`appraise.pp`): if `$force_fixmode`, delegate to
     `ima::appraise::fixmode` (no relabel). Otherwise branch on
     `$facts['cmdline']['ima_appraise']`: `'fix'` → `ima::appraise::relabel`;
     `'off'` → `fixmode` with relabel; `'enforce'` → remove the relabel file;
     default → if `ima_appraise_tcb` is on the cmdline treat as enforce (remove
     relabel file), else `fixmode` with relabel.
   - When `!$enable`: `ima_appraise`/`ima_appraise_tcb` ensured `absent` and the
-    update script removed (`appraise.pp:153-162`).
+    update script removed (`appraise.pp`).
   - `reboot_notify { 'ima_appraise_reboot' }` subscribes to
-    `Kernel_parameter['ima_appraise_tcb']` (`appraise.pp:164-168`).
+    `Kernel_parameter['ima_appraise_tcb']` (`appraise.pp`).
 
-- **`ima::appraise::fixmode` (`manifests/appraise/fixmode.pp:3-34`)** — private
-  (`assert_private()`, `fixmode.pp:7`). Sets `ima_appraise=fix` and, per its
+- **`ima::appraise::fixmode` (`manifests/appraise/fixmode.pp`)** — private
+  (`assert_private()`, `fixmode.pp`). Sets `ima_appraise=fix` and, per its
   `$relabel` parameter, creates or removes the relabel-trigger file; notifies
   `reboot_notify { 'ima_appraise_fix_reboot' }`.
 
-- **`ima::appraise::relabel` (`manifests/appraise/relabel.pp:25-66`)** — private
-  (`assert_private()`, `relabel.pp:29`). Branches on the `ima_security_attr`
+- **`ima::appraise::relabel` (`manifests/appraise/relabel.pp`)** — private
+  (`assert_private()`, `relabel.pp`). Branches on the `ima_security_attr`
   fact (custom, this module): `'inactive'` → set `ima_appraise=enforce`, rebuild
   initramfs (`dracut -f`), notify enforce reboot; `'active'` → warn that the
   relabel script is still running (do not reboot); default (`need_relabel`) →
@@ -115,20 +115,20 @@ private (`ima::appraise::fixmode`, `ima::appraise::relabel`, both
   operator to reboot. Multiple reboots are required to walk appraisal from
   `fix` → `enforce`.
 - **The `securityfs` mount and live policy load are conditional on the running
-  kernel.** Both `mount { $mount_dir }` (`init.pp:54`) and the `load_ima_policy`
-  exec (`policy.pp:194`) only fire when `$facts['cmdline']['ima'] == 'on'` — on
+  kernel.** Both `mount { $mount_dir }` (`init.pp`) and the `load_ima_policy`
+  exec (`policy.pp`) only fire when `$facts['cmdline']['ima'] == 'on'` — on
   a fresh node where IMA was just enabled but not yet rebooted, these resources
   are simply not declared this run.
 - **`ima::policy` renders a "dont_watch" policy by default.** Every
   `dont_watch_*` boolean defaults to `true`, so the generated `policy.conf`
   excludes the standard pseudo-filesystems and SELinux log types from
   measurement. The `measure_*` and `appraise_fowner` toggles all default to
-  `false` (`policy.pp:106-110`).
+  `false` (`policy.pp`).
 - **The template must contain no stray newlines.** `ima_policy.conf.erb` opens
   with `<% # There can be no newlines in this file -%>` and uses trailing-hyphen
   ERB tags throughout; preserve that when editing.
 - **`ima::appraise::relabel` runs the labeling script in the background** (`&`,
-  `relabel.pp:55`) and relies on the `ima_security_attr` fact to detect whether
+  `relabel.pp`) and relies on the `ima_security_attr` fact to detect whether
   it is still running (`lib/facter/ima_security_attr.rb` greps `ps -ef`). Do not
   assume the relabel completes within one Puppet run.
 - **Two custom facts gate behavior and are confined at the OS level:**
@@ -138,13 +138,13 @@ private (`ima::appraise::fixmode`, `ima::appraise::relabel`, both
   `ima_appraise_tcb`. On other hosts these facts are unset and the guarded
   branches are skipped.
 - **Duplicated docstrings in `init.pp`.** The `@param ima_tcb` and
-  `@param log_max_size` blocks each appear twice (`init.pp:24-30` and
-  `init.pp:32-40`) — harmless, but only edit them once each when updating docs.
-- **`measure_module_check` has no `@param` description** (`policy.pp:75` lists it
+  `@param log_max_size` blocks each appear twice (`init.pp` and
+  `init.pp`) — harmless, but only edit them once each when updating docs.
+- **`measure_module_check` has no `@param` description** (`policy.pp` lists it
   with no text); it is still a real parameter used by the template
-  (`ima_policy.conf.erb:33-35`).
+  (`ima_policy.conf.erb`).
 - **`ima::appraise::relabel::scriptdir` reads `$ima::appraise::scriptdir`**
-  (`relabel.pp:27`) as its default — the private class depends on the public
+  (`relabel.pp`) as its default — the private class depends on the public
   `ima::appraise` class variable being set, which holds because `appraise.pp`
   is the only caller.
 
@@ -154,16 +154,16 @@ This module has a **single, minimal** `simp_options` seam — it is not the
 lookup-heavy module the `fips` template describes. There is exactly one
 `simplib::lookup` call:
 
-| Line | Key | `default_value` |
+| File | Key | `default_value` |
 |------|-----|-----------------|
-| `manifests/appraise.pp:77` | `simp_options::package_ensure` | `'installed'` |
+| `manifests/appraise.pp` | `simp_options::package_ensure` | `'installed'` |
 
 The `ima`, `ima::policy`, and the two private classes do **not** consume the
 `simp_options` seam at all. There is also **no module data layer** — the repo
 has no `hiera.yaml` and no `data/` directory, so all defaults live directly in
 the class parameter lists. If you add SIMP feature toggles, route them through
 `simplib::lookup('simp_options::*', { 'default_value' => ... })` with an explicit
-default, matching `appraise.pp:77`.
+default, matching `appraise.pp`.
 
 ## Dependencies
 
@@ -174,7 +174,7 @@ Module dependencies (from `metadata.json`):
 - `simp/simplib` `>= 4.9.0 < 6.0.0` (provides `simplib::lookup`, `reboot_notify`,
   and the `init_systems` fact used in `policy.pp`)
 - `puppetlabs/stdlib` `>= 8.0.0 < 10.0.0` (provides `member()`, used in
-  `policy.pp:161,206`)
+  `policy.pp`)
 
 No optional dependencies are declared (`metadata.json` has no
 `simp.optional_dependencies`).
@@ -274,7 +274,7 @@ during the Puppet → OpenVox migration.
   and only reachable through `ima::appraise`.
 - Route any new SIMP feature toggles through
   `simplib::lookup('simp_options::*', { 'default_value' => ... })`, matching
-  `appraise.pp:77`.
+  `appraise.pp`.
 - `Gemfile`, `.gitignore`, `.pdkignore`, and `.github/workflows/pr_tests.yml`
   carry a **puppetsync** notice — they are baseline-managed and the next sync
   overwrites local edits. Push changes to those files upstream to the baseline,
