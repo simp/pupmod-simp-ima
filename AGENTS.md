@@ -65,7 +65,7 @@ private (`ima::appraise::fixmode`, `ima::appraise::relabel`, both
     `/etc/ima/policy.conf` (`0640`, rendered from
     `${module_name}/ima_policy.conf.erb`). If the node's `init_systems` fact
     includes `systemd` it installs `import_ima_rules.service` (enabled but
-    `ensure => stopped`) and hardlinks the policy to
+    `ensure => stopped`) and hard links the policy to
     `/etc/ima/ima-policy.systemd` via an `exec` (`policy.pp:161-180`); otherwise
     it installs the SysV `/etc/init.d/import_ima_rules` script (`policy.pp:181-192`).
   - `exec { 'load_ima_policy' }` (`policy.pp:194-202`) cats the policy into
