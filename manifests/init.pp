@@ -21,14 +21,6 @@
 # @param ima_hash
 #   The list of supported hashes can be found in ``crypto/hash_infotru.h``
 #
-# @param ima_tcb Toggle the TCB policy.  This means IMA will measure
-#   all programs exec'd, files mmap'd for exec, and all file opened
-#   for read by uid=0. Defaults to true.
-#
-# @param log_max_size The size of the
-#   /sys/kernel/security/ima/ascii_runtime_measurements, in bytes, that will
-#   cause a reboot notification will be sent to the user.
-#
 # @param ima_tcb
 #   Toggle the TCB policy
 #
@@ -48,9 +40,7 @@ class ima (
   Boolean                $ima_tcb         = true,
   Integer[1]             $log_max_size    = 30000000,
 ) {
-
   if $enable {
-
     if $facts['cmdline']['ima'] == 'on' {
       mount { $mount_dir:
         ensure   => mounted,
@@ -94,7 +84,7 @@ class ima (
       }
     }
     else {
-      kernel_parameter { [ 'ima_template', 'ima_hash' ]:
+      kernel_parameter { ['ima_template', 'ima_hash']:
         ensure   => 'absent',
         bootmode => 'normal',
         notify   => Reboot_notify['ima_reboot']
@@ -117,7 +107,7 @@ class ima (
     }
   }
   else {
-    kernel_parameter { [ 'ima', 'ima_audit', 'ima_template', 'ima_hash', 'ima_tcb' ]:
+    kernel_parameter { ['ima', 'ima_audit', 'ima_template', 'ima_hash', 'ima_tcb']:
       ensure   => 'absent',
       bootmode => 'normal',
       notify   => Reboot_notify['ima_reboot']

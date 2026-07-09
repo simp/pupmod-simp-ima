@@ -16,16 +16,17 @@
 #  if the file does not exist, it calls the class to create the
 #  resources for setting the system into enforce mode.
 #
-#  @param relabel_file   The location of the file that
-#     that indicates a labeling of the file system is needed.
+# @param relabel_file
+#   The location of the file that indicates a labeling of the file system
+#   is needed.
 #
-#  @param scriptdir
-#     The directory containing the scripts.
+# @param scriptdir
+#   The directory containing the scripts.
 #
-class ima::appraise::relabel(
+class ima::appraise::relabel (
   Stdlib::AbsolutePath  $relabel_file,
   Stdlib::AbsolutePath  $scriptdir = $ima::appraise::scriptdir,
-){
+) {
   assert_private()
 
   case  $facts['ima_security_attr'] {
@@ -33,7 +34,7 @@ class ima::appraise::relabel(
       kernel_parameter { 'ima_appraise':
         value    => 'enforce',
         bootmode => 'normal',
-        notify   => [ Reboot_notify['ima_appraise_enforce_reboot'], Exec['dracut ima appraise rebuild']]
+        notify   => [Reboot_notify['ima_appraise_enforce_reboot'], Exec['dracut ima appraise rebuild']]
       }
       # Both resources are notified from the kernel_parameter above rather
       # than subscribing to it by title: the augeasproviders_grub
@@ -47,7 +48,7 @@ class ima::appraise::relabel(
       }
     }
     'active': {
-      notify {'IMA updates running':
+      notify { 'IMA updates running':
         message  => 'The script to update the security.ima attributes is running. Do not reboot until the ima_security_attr_update.sh script completes running',
         loglevel => 'warning'
       }
@@ -56,9 +57,10 @@ class ima::appraise::relabel(
       exec { 'ima_security_attr_update':
         command => "${scriptdir}/ima_security_attr_update.sh ${relabel_file} &",
         path    => "${scriptdir}:/sbin:/bin:/usr/sbin:/usr/bin",
+        onlyif  => "/usr/bin/test -f ${relabel_file}",
         require => File["${scriptdir}/ima_security_attr_update.sh"],
       }
-      notify {'IMA updates started':
+      notify { 'IMA updates started':
         message  => 'The script to has been started.  Do not reboot until the ima_security_attr_update.sh script completes running.',
         before   => Exec['ima_security_attr_update'],
         loglevel => 'warning'

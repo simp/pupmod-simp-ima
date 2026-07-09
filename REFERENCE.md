@@ -34,8 +34,6 @@ The following parameters are available in the `ima` class:
 * [`ima_hash`](#-ima--ima_hash)
 * [`ima_tcb`](#-ima--ima_tcb)
 * [`log_max_size`](#-ima--log_max_size)
-* [`ima_tcb`](#-ima--ima_tcb)
-* [`log_max_size`](#-ima--log_max_size)
 
 ##### <a name="-ima--enable"></a>`enable`
 
@@ -86,24 +84,6 @@ Default value: `'sha256'`
 
 Data type: `Boolean`
 
-Toggle the TCB policy.  This means IMA will measure
-all programs exec'd, files mmap'd for exec, and all file opened
-for read by uid=0. Defaults to true.
-
-Default value: `true`
-
-##### <a name="-ima--log_max_size"></a>`log_max_size`
-
-Data type: `Integer[1]`
-
-The size of the
-/sys/kernel/security/ima/ascii_runtime_measurements, in bytes, that will
-cause a reboot notification will be sent to the user.
-
-Default value: `30000000`
-
-##### <a name="-ima--ima_tcb"></a>`ima_tcb`
-
 Toggle the TCB policy
 
 * IMA will measure all programs called via ``exec``, files copied via
@@ -112,6 +92,8 @@ Toggle the TCB policy
 Default value: `true`
 
 ##### <a name="-ima--log_max_size"></a>`log_max_size`
+
+Data type: `Integer[1]`
 
 The size of ``/sys/kernel/security/ima/ascii_runtime_measurements``, in
 bytes, that will cause a reboot notification will be sent to the user.
@@ -241,13 +223,16 @@ The following parameters are available in the `ima::appraise::fixmode` class:
 
 Data type: `StdLib::AbsolutePath`
 
-
+The location of the file used to flag that the file system needs to be
+relabeled with the ``security.ima`` attributes
 
 ##### <a name="-ima--appraise--fixmode--relabel"></a>`relabel`
 
 Data type: `Boolean`
 
-
+Whether the file system needs to be relabeled with the ``security.ima``
+attributes.  When ``true``, ``$relabel_file`` is created; when
+``false``, it is ensured absent
 
 ### <a name="ima--appraise--relabel"></a>`ima::appraise::relabel`
 
@@ -269,12 +254,6 @@ This module executes the script to label the files
  if the file does not exist, it calls the class to create the
  resources for setting the system into enforce mode.
 
- @param relabel_file   The location of the file that
-    that indicates a labeling of the file system is needed.
-
- @param scriptdir
-    The directory containing the scripts.
-
 #### Parameters
 
 The following parameters are available in the `ima::appraise::relabel` class:
@@ -286,13 +265,14 @@ The following parameters are available in the `ima::appraise::relabel` class:
 
 Data type: `Stdlib::AbsolutePath`
 
-
+The location of the file that indicates a labeling of the file system
+is needed.
 
 ##### <a name="-ima--appraise--relabel--scriptdir"></a>`scriptdir`
 
 Data type: `Stdlib::AbsolutePath`
 
-
+The directory containing the scripts.
 
 Default value: `$ima::appraise::scriptdir`
 
