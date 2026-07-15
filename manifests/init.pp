@@ -67,7 +67,8 @@ class ima (
 
     kernel_parameter { 'ima':
       value    => 'on',
-      bootmode => 'normal'
+      bootmode => 'normal',
+      notify   => Reboot_notify['ima_reboot']
     }
 
     $_ima_audit = $ima_audit ? {
@@ -76,23 +77,27 @@ class ima (
     }
     kernel_parameter { 'ima_audit':
       value    => $_ima_audit,
-      bootmode => 'normal'
+      bootmode => 'normal',
+      notify   => Reboot_notify['ima_reboot']
     }
 
-    if (versioncmp($facts[kernelmajversion],'3.13') >= 0) {
+    if (versioncmp($facts['kernelmajversion'],'3.13') >= 0) {
       kernel_parameter { 'ima_template':
         value    => $ima_template,
-        bootmode => 'normal'
+        bootmode => 'normal',
+        notify   => Reboot_notify['ima_reboot']
       }
       kernel_parameter { 'ima_hash':
         value    => $ima_hash,
-        bootmode => 'normal'
+        bootmode => 'normal',
+        notify   => Reboot_notify['ima_reboot']
       }
     }
     else {
       kernel_parameter { [ 'ima_template', 'ima_hash' ]:
         ensure   => 'absent',
-        bootmode => 'normal'
+        bootmode => 'normal',
+        notify   => Reboot_notify['ima_reboot']
       }
     }
 
@@ -114,17 +119,18 @@ class ima (
   else {
     kernel_parameter { [ 'ima', 'ima_audit', 'ima_template', 'ima_hash', 'ima_tcb' ]:
       ensure   => 'absent',
-      bootmode => 'normal'
+      bootmode => 'normal',
+      notify   => Reboot_notify['ima_reboot']
     }
   }
 
-  reboot_notify { 'ima_reboot':
-    subscribe => [
-      Kernel_parameter['ima'],
-      Kernel_parameter['ima_tcb'],
-      Kernel_parameter['ima_audit'],
-      Kernel_parameter['ima_template'],
-      Kernel_parameter['ima_hash']
-    ]
-  }
+  # Each kernel_parameter above declares `notify => Reboot_notify['ima_reboot']`
+  # rather than this resource subscribing to them by title. The
+  # kernel_parameter type (augeasproviders_grub) uses composite namevars
+  # (name + bootmode) and overrides its title to "<name>:<bootmode>", so a
+  # bare-title reference such as Kernel_parameter['ima'] no longer resolves to
+  # a resource declared with bootmode => 'normal' -- it fails catalog
+  # dependency resolution. Notifying from each resource avoids the title
+  # lookup entirely, matching the pattern in the fips and selinux modules.
+  reboot_notify { 'ima_reboot': }
 }

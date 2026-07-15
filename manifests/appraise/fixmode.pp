@@ -26,9 +26,10 @@ class ima::appraise::fixmode(
     }
   }
 
-  reboot_notify { 'ima_appraise_fix_reboot':
-    subscribe => [
-      Kernel_parameter['ima_appraise'],
-    ]
-  }
+  # Notified from the kernel_parameter above rather than subscribing to it by
+  # title: the augeasproviders_grub kernel_parameter type uses composite
+  # namevars, so a bare Kernel_parameter['ima_appraise'] reference does not
+  # resolve to a resource declared with bootmode => 'normal'. See ima
+  # (init.pp).
+  reboot_notify { 'ima_appraise_fix_reboot': }
 }

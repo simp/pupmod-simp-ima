@@ -154,16 +154,18 @@ class ima::appraise(
   # If ima_appraise disabled
     kernel_parameter { ['ima_appraise', 'ima_appraise_tcb']:
       ensure   => absent,
-      bootmode => 'normal'
+      bootmode => 'normal',
+      notify   => Reboot_notify['ima_appraise_reboot']
     }
     file { "${scriptdir}/ima_security_attr_update.sh":
       ensure => absent
     }
   }
 
-  reboot_notify { 'ima_appraise_reboot':
-    subscribe => [
-      Kernel_parameter['ima_appraise_tcb'],
-    ]
-  }
+  # Notified from the kernel_parameter resources above rather than subscribing
+  # to them by title: the augeasproviders_grub kernel_parameter type uses
+  # composite namevars (name + bootmode), so a bare Kernel_parameter['...']
+  # reference does not resolve to a resource declared with bootmode => 'normal'
+  # and breaks catalog dependency resolution. See ima (init.pp) for detail.
+  reboot_notify { 'ima_appraise_reboot': }
 }
