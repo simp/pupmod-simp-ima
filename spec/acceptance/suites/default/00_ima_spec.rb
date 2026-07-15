@@ -24,6 +24,16 @@ describe 'ima class' do
     end
 
     hosts.each do |host|
+      # On a fresh node the Sicura console previews this module with
+      # `puppet apply --noop`, which must not error. Exercise that here before
+      # the real applies below. No package-removal step: ima manages kernel
+      # params/policy state only, so noop-only is the representative check.
+      context 'in noop mode from a clean state' do
+        it 'applies without errors in noop mode' do
+          apply_manifest_on(host, manifest, catch_failures: true, noop: true)
+        end
+      end
+
       it 'runs puppet' do
         apply_manifest_on(host, manifest, catch_failures: true)
       end
