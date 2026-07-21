@@ -8,6 +8,7 @@ shared_examples_for 'an ima appraise enabled system' do
   it { is_expected.to create_package('ima-evm-utils') }
   it { is_expected.to create_kernel_parameter('ima_appraise_tcb') }
   it { is_expected.to create_kernel_parameter('ima_appraise_tcb').with_bootmode('normal') }
+  it { is_expected.to create_kernel_parameter('ima_appraise_tcb').that_notifies('Reboot_notify[ima_appraise_reboot]') }
   it { is_expected.to create_kernel_parameter('rootflags').with_value('i_version') }
   it { is_expected.to create_kernel_parameter('rootflags').with_bootmode('normal') }
   it do
@@ -138,10 +139,12 @@ describe 'ima::appraise' do
         it do
           is_expected.to create_kernel_parameter('ima_appraise_tcb')
             .with('ensure' => 'absent')
+            .that_notifies('Reboot_notify[ima_appraise_reboot]')
         end
         it do
           is_expected.to create_kernel_parameter('ima_appraise')
             .with('ensure' => 'absent')
+            .that_notifies('Reboot_notify[ima_appraise_reboot]')
         end
       end
     end
