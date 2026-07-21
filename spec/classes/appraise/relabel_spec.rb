@@ -27,15 +27,15 @@ describe 'ima::appraise' do
             .with(
               'value'    => 'enforce',
               'bootmode' => 'normal',
-            ).that_notifies('Exec[dracut ima appraise rebuild]')
+            ).that_notifies(['Reboot_notify[ima_appraise_enforce_reboot]', 'Exec[dracut ima appraise rebuild]'])
         }
         it {
           is_expected.to contain_exec('dracut ima appraise rebuild').with(
             'command'     => '/sbin/dracut -f',
             'refreshonly' => true,
-          ).that_subscribes_to('Kernel_parameter[ima_appraise]')
+          )
         }
-        it { is_expected.to contain_reboot_notify('ima_appraise_enforce_reboot').that_subscribes_to('Kernel_parameter[ima_appraise]') }
+        it { is_expected.to contain_reboot_notify('ima_appraise_enforce_reboot') }
       end
 
       context 'with ima_security_attr active' do

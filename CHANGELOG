@@ -1,3 +1,10 @@
+* Wed Jul 15 2026 Hazel Caballero <hazel@sicura.us> - 1.0.1
+- Fix catalog dependency resolution failure caused by referencing
+  `kernel_parameter` resources by bare title. The augeasproviders_grub
+  `kernel_parameter` type uses composite namevars, so `reboot_notify`
+  resources now receive `notify` from each `kernel_parameter` instead of
+  subscribing to them by title (matching the fips and selinux modules)
+
 * Mon Jun 08 2026 Steven Pritchard <steven.pritchard@gmail.com> - 1.0.0
 - Switch `requirements` from `puppet` to `openvox` (>= 8 < 9)
 - Point `issues_url` at GitHub Issues

@@ -16,10 +16,12 @@ describe 'ima' do
         it { is_expected.not_to contain_reboot_notify('ima_log') }
         it { is_expected.to contain_kernel_parameter('ima').with_value('on') }
         it { is_expected.to contain_kernel_parameter('ima').with_bootmode('normal') }
+        it { is_expected.to contain_kernel_parameter('ima').that_notifies('Reboot_notify[ima_reboot]') }
         it { is_expected.to contain_kernel_parameter('ima_audit').with_value('0') }
         it { is_expected.to contain_kernel_parameter('ima_audit').with_bootmode('normal') }
         it { is_expected.to contain_kernel_parameter('ima_tcb') }
         it { is_expected.to contain_kernel_parameter('ima_tcb').with_bootmode('normal') }
+        it { is_expected.to contain_kernel_parameter('ima_tcb').that_notifies('Reboot_notify[ima_reboot]') }
 
         it do
           is_expected.to contain_mount('/sys/kernel/security').with(
@@ -78,6 +80,8 @@ describe 'ima' do
         it { is_expected.to contain_kernel_parameter('ima_hash').with_bootmode('normal') }
         it { is_expected.to contain_kernel_parameter('ima_tcb') }
         it { is_expected.to contain_kernel_parameter('ima_tcb').with_bootmode('normal') }
+        it { is_expected.to contain_kernel_parameter('ima').that_notifies('Reboot_notify[ima_reboot]') }
+        it { is_expected.to contain_kernel_parameter('ima_tcb').that_notifies('Reboot_notify[ima_reboot]') }
       end
 
       context 'with_kernel_version < 3.13' do
@@ -107,6 +111,8 @@ describe 'ima' do
         it { is_expected.to contain_kernel_parameter('ima_hash').with_bootmode('normal') }
         it { is_expected.to contain_kernel_parameter('ima_audit').with_value('1') }
         it { is_expected.to contain_kernel_parameter('ima_tcb') }
+        it { is_expected.to contain_kernel_parameter('ima').that_notifies('Reboot_notify[ima_reboot]') }
+        it { is_expected.to contain_kernel_parameter('ima_tcb').that_notifies('Reboot_notify[ima_reboot]') }
       end
 
       context 'with enable set to false' do
@@ -130,6 +136,8 @@ describe 'ima' do
         it { is_expected.to create_kernel_parameter('ima_template').with_bootmode('normal') }
         it { is_expected.to create_kernel_parameter('ima_hash').with_ensure('absent') }
         it { is_expected.to create_kernel_parameter('ima_hash').with_bootmode('normal') }
+        it { is_expected.to create_kernel_parameter('ima').that_notifies('Reboot_notify[ima_reboot]') }
+        it { is_expected.to create_kernel_parameter('ima_tcb').that_notifies('Reboot_notify[ima_reboot]') }
       end
     end
   end

@@ -26,7 +26,7 @@ describe 'ima::appraise' do
             ).that_notifies('Reboot_notify[ima_appraise_fix_reboot]')
         end
         it { is_expected.to contain_file('/tmp/simp/.ima_relabel').with({ 'ensure' => 'absent' }) }
-        it { is_expected.to contain_reboot_notify('ima_appraise_fix_reboot').that_subscribes_to('Kernel_parameter[ima_appraise]') }
+        it { is_expected.to contain_reboot_notify('ima_appraise_fix_reboot') }
       end
 
       context 'with relabel true' do
@@ -46,7 +46,7 @@ describe 'ima::appraise' do
           ).that_notifies('Reboot_notify[ima_appraise_fix_reboot]')
         end
         it { is_expected.to contain_file('/tmp/simp/.ima_relabel').with({ 'ensure' => 'file' }) }
-        it { is_expected.to contain_reboot_notify('ima_appraise_fix_reboot').that_subscribes_to('Kernel_parameter[ima_appraise]') }
+        it { is_expected.to contain_reboot_notify('ima_appraise_fix_reboot') }
       end
     end
   end
