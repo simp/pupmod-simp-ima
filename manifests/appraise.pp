@@ -69,17 +69,16 @@
 #
 # @author SIMP Team  <https://simp-project.com/>
 #
-class ima::appraise(
+class ima::appraise (
   Boolean                $enable          = true,
   Stdlib::AbsolutePath   $relabel_file    = "${facts['puppet_vardir']}/simp/.ima_relabel",
   Stdlib::AbsolutePath   $scriptdir       = '/usr/local/bin',
   Boolean                $force_fixmode   = false,
   Simplib::PackageEnsure $ensure_packages = simplib::lookup('simp_options::package_ensure', { 'default_value' => 'installed' })
-){
-  include '::ima'
+) {
+  include 'ima'
 
   if $enable {
-
     # Provides ability to check for special attributes
     package { 'attr':
       ensure => $ensure_packages
@@ -134,13 +133,13 @@ class ima::appraise(
         }
         default: {
           if $facts['cmdline']['ima_appraise_tcb'] {
-          # if ima_appraise_tcb defaults to enforce mode.
+            # if ima_appraise_tcb defaults to enforce mode.
             file { $relabel_file:
               ensure => absent
             }
           }
           else {
-          # It is being turned on and should be set to fix mode
+            # It is being turned on and should be set to fix mode
             class { 'ima::appraise::fixmode':
               relabel_file => $relabel_file,
               relabel      => true
@@ -151,7 +150,7 @@ class ima::appraise(
     }
   }
   else {
-  # If ima_appraise disabled
+    # If ima_appraise disabled
     kernel_parameter { ['ima_appraise', 'ima_appraise_tcb']:
       ensure   => absent,
       bootmode => 'normal',

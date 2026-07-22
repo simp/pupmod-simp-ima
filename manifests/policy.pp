@@ -109,8 +109,7 @@ class ima::policy (
   Boolean       $measure_module_check        = false,
   Boolean       $appraise_fowner             = false,
 ) {
-
-  include '::ima'
+  include 'ima'
 
   # magic reference is in Kernel documentation Documentation/ABI/testing/ima_policy
   $magic_hash = {
@@ -144,7 +143,6 @@ class ima::policy (
   }
 
   if $manage {
-
     file { '/etc/ima':
       ensure => directory,
       mode   => '0750',
@@ -159,8 +157,8 @@ class ima::policy (
     }
 
     if member($facts['init_systems'], 'systemd') {
-    # Create a hardlink to the custom policy so it is loaded by
-    # systemd at startup.
+      # Create a hardlink to the custom policy so it is loaded by
+      # systemd at startup.
       file { '/usr/lib/systemd/system/import_ima_rules.service':
         ensure => file,
         mode   => '0644',
@@ -202,9 +200,7 @@ class ima::policy (
     }
   }
   else {
-
     if member($facts['init_systems'], 'systemd') {
-
       file { '/usr/lib/systemd/system/import_ima_rules.service':
         ensure => absent,
       }

@@ -1,9 +1,18 @@
 #  set the ima appraise mode to fix
 #
-class ima::appraise::fixmode(
+# @param relabel_file
+#   The location of the file used to flag that the file system needs to be
+#   relabeled with the ``security.ima`` attributes
+#
+# @param relabel
+#   Whether the file system needs to be relabeled with the ``security.ima``
+#   attributes.  When ``true``, ``$relabel_file`` is created; when
+#   ``false``, it is ensured absent
+#
+class ima::appraise::fixmode (
   StdLib::AbsolutePath $relabel_file,
   Boolean              $relabel
-){
+) {
   assert_private()
 
   kernel_parameter { 'ima_appraise':

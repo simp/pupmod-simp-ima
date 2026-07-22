@@ -1,3 +1,6 @@
+* Tue Jul 21 2026 Steven Pritchard <steve@sicura.us> - 1.0.2
+- Documented parameters, added data types, and resolved puppet-lint offenses
+
 * Wed Jul 15 2026 Hazel Caballero <hazel@sicura.us> - 1.0.1
 - Fix catalog dependency resolution failure caused by referencing
   `kernel_parameter` resources by bare title. The augeasproviders_grub
