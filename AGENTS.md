@@ -51,10 +51,15 @@ private (`ima::appraise::fixmode`, `ima::appraise::relabel`, both
     log.
   - When `!$enable`, `ima`/`ima_audit`/`ima_template`/`ima_hash`/`ima_tcb` are
     all ensured `absent` (`init.pp`).
-  - `reboot_notify { 'ima_reboot' }` subscribes to all five kernel parameters
-    (`init.pp`).
+  - Each `kernel_parameter` above declares `notify => Reboot_notify['ima_reboot']`
+    and `reboot_notify { 'ima_reboot' }` itself has an empty body (`init.pp`).
+    The relationship is declared **on** the kernel parameters rather than as a
+    `subscribe` on `reboot_notify`: the `augeasproviders_grub` `kernel_parameter`
+    type uses composite namevars (title becomes `<name>:<bootmode>`), so a bare
+    `Kernel_parameter['ima']` title reference would not resolve to the declared
+    resource and would break catalog dependency resolution.
 
-- **`ima::policy` (`manifests/policy.pp`)** — public; `include '::ima'`
+- **`ima::policy` (`manifests/policy.pp`)** — public; `include 'ima'`
   (`policy.pp`). One boolean per filesystem/SELinux context to exclude from
   measurement (all default `true`), plus `$dont_watch_list` (extra SELinux
   contexts, `policy.pp`) and `measure_*` / `appraise_fowner` toggles (all
@@ -75,8 +80,8 @@ private (`ima::appraise::fixmode`, `ima::appraise::relabel`, both
   - When `!$manage` (`policy.pp`): removes the loader unit/script and
     disables the service.
 
-- **`ima::appraise` (`manifests/appraise.pp`)** — public; `include
-  '::ima'` (`appraise.pp`). Parameters (`appraise.pp`): `$enable`
+- **`ima::appraise` (`manifests/appraise.pp`)** — public; `include 'ima'`
+  (`appraise.pp`). Parameters (`appraise.pp`): `$enable`
   (default `true`), `$relabel_file` (default
   `${facts['puppet_vardir']}/simp/.ima_relabel`), `$scriptdir` (default
   `/usr/local/bin`), `$force_fixmode` (default `false`), `$ensure_packages`
@@ -93,8 +98,10 @@ private (`ima::appraise::fixmode`, `ima::appraise::relabel`, both
     relabel file), else `fixmode` with relabel.
   - When `!$enable`: `ima_appraise`/`ima_appraise_tcb` ensured `absent` and the
     update script removed (`appraise.pp`).
-  - `reboot_notify { 'ima_appraise_reboot' }` subscribes to
-    `Kernel_parameter['ima_appraise_tcb']` (`appraise.pp`).
+  - `kernel_parameter { 'ima_appraise_tcb' }` declares `notify =>
+    Reboot_notify['ima_appraise_reboot']` and `reboot_notify
+    { 'ima_appraise_reboot' }` has an empty body (`appraise.pp`) — same
+    composite-namevar reason as `ima_reboot` above.
 
 - **`ima::appraise::fixmode` (`manifests/appraise/fixmode.pp`)** — private
   (`assert_private()`, `fixmode.pp`). Sets `ima_appraise=fix` and, per its
@@ -137,12 +144,6 @@ private (`ima::appraise::fixmode`, `ima::appraise::relabel`, both
   (`lib/facter/ima_security_attr.rb`) is confined to hosts whose `cmdline` has
   `ima_appraise_tcb`. On other hosts these facts are unset and the guarded
   branches are skipped.
-- **Duplicated docstrings in `init.pp`.** The `@param ima_tcb` and
-  `@param log_max_size` blocks each appear twice (`init.pp` and
-  `init.pp`) — harmless, but only edit them once each when updating docs.
-- **`measure_module_check` has no `@param` description** (`policy.pp` lists it
-  with no text); it is still a real parameter used by the template
-  (`ima_policy.conf.erb`).
 - **`ima::appraise::relabel::scriptdir` reads `$ima::appraise::scriptdir`**
   (`relabel.pp`) as its default — the private class depends on the public
   `ima::appraise` class variable being set, which holds because `appraise.pp`
@@ -246,18 +247,22 @@ bundle exec rake lint
 # Ruby lint
 bundle exec rake rubocop
 
-# Regenerate REFERENCE.md from puppet-strings docstrings
+# Regenerate REFERENCE.md from openvox-strings (puppet-strings) docstrings
 puppet strings generate --format markdown --out REFERENCE.md
 
 # Run the default beaker acceptance suite
 bundle exec rake beaker:suites[default]
 ```
 
-Relevant gem pins (from `Gemfile`): `puppetlabs_spec_helper ~> 8.0.0`,
-`simp-rake-helpers ~> 5.24.0`, `simp-rspec-puppet-facts ~> 4.0.0`,
-`simp-beaker-helpers ~> 2.0.0`. Rubocop is pinned to `~> 1.88.0`. The `:test`
-group loads **both** the `openvox` and `puppet` gems (defaulting to `>= 8 < 9`)
-during the Puppet → OpenVox migration.
+Relevant gem pins (from `Gemfile`): `simp-rake-helpers ~> 6.0`,
+`simp-rspec-puppet-facts ~> 4.0.0`, `simp-beaker-helpers ~> 3.1`, and
+`voxpupuli-test` (pulled in via `simp-rake-helpers`), which supplies the
+rspec-puppet stack and version-pins `rubocop`/`rubocop-rake`/`rubocop-rspec` —
+so those are **not** pinned directly here (only `rubocop-performance ~> 1.26.0`
+is). The `:test` group loads `openvox` and `openvox-strings`; the `puppet` and
+`puppet-strings` gems were dropped in the OpenVox 9 / Ruby 4 preview migration.
+OpenVox defaults to `>= 8 < 9`, overridable via `PUPPET_VERSION` /
+`OPENVOX_VERSION`.
 
 ## Conventions
 
