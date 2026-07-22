@@ -30,12 +30,9 @@ private (`ima::appraise::fixmode`, `ima::appraise::relabel`, both
 `assert_private()`'d).
 
 - **`ima` (`manifests/init.pp`)** — public entry class (consumers
-  `include 'ima'`). Parameters (`init.pp`): `$enable` (`Boolean`, default
-  `true`), `$mount_dir` (`Stdlib::AbsolutePath`, default
-  `/sys/kernel/security`), `$ima_audit` (`Boolean`, default `false`),
-  `$ima_template` (`Ima::Template`, default `'ima-ng'`), `$ima_hash`
-  (`String[1]`, default `'sha256'`), `$ima_tcb` (`Boolean`, default `true`),
-  `$log_max_size` (`Integer[1]`, default `30000000`).
+  `include 'ima'`). Parameters (`init.pp`; see `REFERENCE.md` for types and
+  defaults): `$enable`, `$mount_dir`, `$ima_audit`, `$ima_template`,
+  `$ima_hash`, `$ima_tcb`, and `$log_max_size`.
   - When `$enable`: the `securityfs` `mount` is declared **only if the running
     kernel already has `ima=on`** (`$facts['cmdline']['ima'] == 'on'`,
     `init.pp`). `kernel_parameter { 'ima' }` is set to `'on'`
@@ -81,11 +78,9 @@ private (`ima::appraise::fixmode`, `ima::appraise::relabel`, both
     disables the service.
 
 - **`ima::appraise` (`manifests/appraise.pp`)** — public; `include 'ima'`
-  (`appraise.pp`). Parameters (`appraise.pp`): `$enable`
-  (default `true`), `$relabel_file` (default
-  `${facts['puppet_vardir']}/simp/.ima_relabel`), `$scriptdir` (default
-  `/usr/local/bin`), `$force_fixmode` (default `false`), `$ensure_packages`
-  (`Simplib::PackageEnsure`, default via `simplib::lookup` — see the seam
+  (`appraise.pp`). Parameters (`appraise.pp`; see `REFERENCE.md` for types and
+  defaults): `$enable`, `$relabel_file`, `$scriptdir`, `$force_fixmode`, and
+  `$ensure_packages` (the last defaults via `simplib::lookup` — see the seam
   section below).
   - When `$enable`: installs `attr` and `ima-evm-utils`, sets
     `ima_appraise_tcb` and `rootflags=i_version` kernel parameters, and
