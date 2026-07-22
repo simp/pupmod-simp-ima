@@ -168,14 +168,14 @@ default, matching `appraise.pp`.
 
 ## Dependencies
 
-Module dependencies (from `metadata.json`):
+Module dependencies — see `metadata.json` for the authoritative names and
+version ranges; what each provides:
 
-- `puppet/augeasproviders_grub` `>= 3.1.0 < 7.0.0` (provides the
-  `kernel_parameter` type/provider used throughout)
-- `simp/simplib` `>= 4.9.0 < 6.0.0` (provides `simplib::lookup`, `reboot_notify`,
-  and the `init_systems` fact used in `policy.pp`)
-- `puppetlabs/stdlib` `>= 8.0.0 < 10.0.0` (provides `member()`, used in
-  `policy.pp`)
+- `puppet/augeasproviders_grub` — the `kernel_parameter` type/provider used
+  throughout.
+- `simp/simplib` — `simplib::lookup`, `reboot_notify`, and the `init_systems`
+  fact used in `policy.pp`.
+- `puppetlabs/stdlib` — `member()`, used in `policy.pp`.
 
 No optional dependencies are declared (`metadata.json` has no
 `simp.optional_dependencies`).
@@ -186,11 +186,10 @@ core provider, needed to test the `mount` resource), plus the runtime deps
 above. Note **`simp_options` is not even a fixture** here — the sole
 `simp_options::package_ensure` lookup falls through to its default in tests.
 
-Runtime requirement (from `metadata.json` `requirements`): `openvox
->= 8.0.0 < 9.0.0`.
-
-Supported OS matrix (from `metadata.json`): CentOS 9/10; RedHat 8/9/10;
-OracleLinux 8/9/10; Rocky 8/9/10; AlmaLinux 8/9/10. (No Amazon Linux.)
+The runtime engine (`openvox`) and the supported OS matrix (RHEL-family EL8–10,
+no Amazon Linux) are declared in `metadata.json` under `requirements` and
+`operatingsystem_support` — consult it for exact versions rather than trusting
+numbers duplicated here.
 
 ## Repository layout
 
@@ -254,14 +253,13 @@ puppet strings generate --format markdown --out REFERENCE.md
 bundle exec rake beaker:suites[default]
 ```
 
-Relevant gem pins (from `Gemfile`): `simp-rake-helpers ~> 6.0`,
-`simp-rspec-puppet-facts ~> 4.0.0`, `simp-beaker-helpers ~> 3.1`, and
-`voxpupuli-test` (pulled in via `simp-rake-helpers`), which supplies the
-rspec-puppet stack and version-pins `rubocop`/`rubocop-rake`/`rubocop-rspec` —
-so those are **not** pinned directly here (only `rubocop-performance ~> 1.26.0`
-is). The `:test` group loads `openvox` and `openvox-strings`; the `puppet` and
-`puppet-strings` gems were dropped in the OpenVox 9 / Ruby 4 preview migration.
-OpenVox defaults to `>= 8 < 9`, overridable via `PUPPET_VERSION` /
+The test toolchain (see `Gemfile` for exact pins): `simp-rake-helpers` pulls in
+`voxpupuli-test`, which supplies the rspec-puppet stack and version-pins
+`rubocop`/`rubocop-rake`/`rubocop-rspec` — so those are **not** pinned directly
+here (`rubocop-performance` is the one exception). The `:test` group loads
+`openvox` and `openvox-strings`; the `puppet` and `puppet-strings` gems were
+dropped in the OpenVox 9 / Ruby 4 preview migration. The engine version defaults
+to the `metadata.json` range and is overridable via `PUPPET_VERSION` /
 `OPENVOX_VERSION`.
 
 ## Conventions
