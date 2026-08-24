@@ -1,3 +1,6 @@
+* Mon Aug 24 2026 Steven Pritchard <steve@sicura.us> - 1.0.3
+- [puppetsync] Update metadata.json dependency ranges from the Forge
+
 * Tue Jul 21 2026 Steven Pritchard <steve@sicura.us> - 1.0.2
 - Documented parameters, added data types, and resolved puppet-lint offenses
 
