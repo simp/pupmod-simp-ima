@@ -7,10 +7,10 @@
 ### Classes
 
 * [`ima`](#ima): Sets up IMA kernel boot flags if they are not enabled, and mounts the ``securityfs`` when they are.
-* [`ima::appraise`](#ima--appraise): Manage IMA Appraisal  To enable IMA appraisal first make sure all your locally mounted file systems with root files on them are mounted with 
+* [`ima::appraise`](#ima--appraise): Manage IMA Appraisal  To enable IMA appraisal first make sure all your locally mounted file systems with root files on them are mounted with
 * [`ima::appraise::fixmode`](#ima--appraise--fixmode): set the ima appraise mode to fix
 * [`ima::appraise::relabel`](#ima--appraise--relabel): This module executes the script to label the files  systems with the security.ima attributes and if it  is complete, adds resources to set im
-* [`ima::policy`](#ima--policy): Manage IMA Policy    * The term ``watch``, as used here, means both IMA policy fields     ``dont_measure`` and ``dont_appraise``. Both lines 
+* [`ima::policy`](#ima--policy): Manage IMA Policy    * The term ``watch``, as used here, means both IMA policy fields     ``dont_measure`` and ``dont_appraise``. Both lines
 
 ### Data types
 
@@ -583,4 +583,3 @@ Default value: `false`
 The Ima::Template data type.
 
 Alias of `Enum['ima', 'ima-ng', 'ima-sig']`
-
